@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
             const response = await fetch(
-                "https://royal-cash-backend-production.up.railway.app/subscription/subscribe",
+"https://royal-cash-backend-production-04cf.up.railway.app/subscription/subscribe",
                 {
 
                     method:"POST",
