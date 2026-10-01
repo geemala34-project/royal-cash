@@ -7,7 +7,7 @@
 "use strict";
 
 
-const API_URL = "https://royal-cash-backend-production.up.railway.app";
+const API_URL = "https://royal-cash-backend-production-04cf.up.railway.app";
 
 const loginModal = document.getElementById("rcLoginModal");
 const signupModal = document.getElementById("rcSignupModal");
