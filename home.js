@@ -1,3 +1,5 @@
+
+
 /* =========================================================
    ROYAL CASH HOME JS
    Slider + game-row controls + premium desktop tilt
@@ -718,7 +720,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 const response = await fetch(
-                    "https://royal-cash-backend-production.up.railway.app/auth/change-password",
+"https://royal-cash-backend-production-04cf.up.railway.app/auth/change-password",
                     {
 
                         method:"POST",
