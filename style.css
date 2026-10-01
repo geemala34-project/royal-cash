@@ -1,0 +1,863 @@
+
+/* =========================================
+   ROYAL CASH INTRO - COMPLETE CSS
+========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #05020b;
+}
+
+
+/* =========================================
+   MAIN INTRO SCREEN
+========================================= */
+
+.intro-screen {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100vh;
+
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* YOUR SAVED BACKGROUND IMAGE */
+  background:
+    linear-gradient(
+      rgba(4, 1, 10, 0.10),
+      rgba(4, 1, 10, 0.18)
+    ),
+    url("royal cash background.png");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  transition:
+    opacity 0.8s ease,
+    visibility 0.8s ease;
+}
+
+
+/* Fade when loading finishes */
+
+.intro-screen.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+
+/* =========================================
+   VERY LIGHT OVERLAY
+========================================= */
+
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at center,
+      transparent 45%,
+      rgba(0, 0, 0, 0.18) 100%
+    );
+
+  pointer-events: none;
+}
+
+
+/* Extra CSS glow not needed because
+   background image already has purple glow */
+
+.bg-glow {
+  display: none;
+}
+
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
+.intro-content {
+  position: relative;
+  z-index: 5;
+
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px;
+}
+
+
+/* =========================================
+   LOGO AREA
+========================================= */
+
+.logo-stage {
+  position: relative;
+
+  width: 370px;
+  height: 370px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  animation:
+    floatLogo 3.6s ease-in-out infinite;
+}
+
+
+/* Soft glow behind logo */
+
+.logo-glow {
+  position: absolute;
+
+  width: 255px;
+  height: 255px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(183, 71, 255, 0.25),
+      rgba(120, 30, 220, 0.07) 55%,
+      transparent 75%
+    );
+
+  filter: blur(28px);
+
+  animation:
+    glowPulse 3s ease-in-out infinite;
+}
+
+
+/* Main Royal Cash logo */
+
+.royal-logo {
+  position: relative;
+
+  width: 295px;
+  max-width: 70vw;
+
+  object-fit: contain;
+
+  z-index: 4;
+
+  filter:
+    drop-shadow(
+      0 0 8px rgba(195, 83, 255, 0.38)
+    )
+    drop-shadow(
+      0 0 20px rgba(116, 30, 220, 0.20)
+    );
+}
+
+
+/* Floating shadow */
+
+.logo-shadow {
+  position: absolute;
+
+  bottom: 42px;
+
+  width: 155px;
+  height: 18px;
+
+  border-radius: 50%;
+
+  background:
+    rgba(157, 61, 255, 0.28);
+
+  filter: blur(17px);
+
+  animation:
+    shadowPulse 3.6s ease-in-out infinite;
+}
+
+
+/* Logo floating animation */
+
+@keyframes floatLogo {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+}
+
+
+/* Glow animation */
+
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+
+}
+
+
+/* Shadow animation */
+
+@keyframes shadowPulse {
+
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.42;
+  }
+
+  50% {
+    transform: scaleX(0.78);
+    opacity: 0.20;
+  }
+
+}
+
+
+/* =========================================
+   SUBTLE ORBIT LINES
+========================================= */
+
+.orbit {
+  position: absolute;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  opacity: 0.55;
+}
+
+
+.orbit-1 {
+  width: 325px;
+  height: 130px;
+
+  border-top:
+    1px solid rgba(255, 194, 95, 0.75);
+
+  border-left:
+    1px solid rgba(197, 92, 255, 0.40);
+
+  transform: rotate(18deg);
+
+  filter:
+    drop-shadow(
+      0 0 5px rgba(196, 85, 255, 0.18)
+    );
+
+  animation:
+    orbitOne 13s linear infinite;
+}
+
+
+.orbit-2 {
+  width: 310px;
+  height: 122px;
+
+  border-bottom:
+    1px solid rgba(205, 91, 255, 0.32);
+
+  border-right:
+    1px solid rgba(255, 198, 95, 0.40);
+
+  transform: rotate(-20deg);
+
+  animation:
+    orbitTwo 15s linear infinite;
+}
+
+
+@keyframes orbitOne {
+
+  from {
+    transform: rotate(18deg);
+  }
+
+  to {
+    transform: rotate(378deg);
+  }
+
+}
+
+
+@keyframes orbitTwo {
+
+  from {
+    transform: rotate(-20deg);
+  }
+
+  to {
+    transform: rotate(-380deg);
+  }
+
+}
+
+
+/* =========================================
+   SMALL SPARKLES
+========================================= */
+
+.sparkle {
+  position: absolute;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background:
+    #ffe0a0;
+
+  box-shadow:
+    0 0 6px rgba(255, 224, 160, 0.85),
+    0 0 12px rgba(185, 82, 255, 0.24);
+
+  z-index: 2;
+
+  opacity: 0.65;
+
+  animation:
+    twinkle 2.5s ease-in-out infinite;
+}
+
+
+.sparkle::before,
+.sparkle::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  transform:
+    translate(-50%, -50%);
+
+  background:
+    rgba(255, 230, 180, 0.92);
+
+  border-radius: 999px;
+}
+
+
+.sparkle::before {
+  width: 1px;
+  height: 11px;
+}
+
+
+.sparkle::after {
+  width: 11px;
+  height: 1px;
+}
+
+
+/* positions */
+
+.sp1 {
+  top: 20%;
+  left: 27%;
+}
+
+.sp2 {
+  top: 22%;
+  right: 27%;
+  animation-delay: 0.4s;
+}
+
+.sp3 {
+  top: 38%;
+  left: 22%;
+  animation-delay: 0.8s;
+}
+
+.sp4 {
+  top: 39%;
+  right: 22%;
+  animation-delay: 1.1s;
+}
+
+.sp5 {
+  top: 58%;
+  left: 25%;
+  animation-delay: 1.4s;
+}
+
+.sp6 {
+  top: 59%;
+  right: 25%;
+  animation-delay: 0.7s;
+}
+
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
+
+  50% {
+    opacity: 0.90;
+    transform: scale(1.10);
+  }
+
+}
+
+
+/* =========================================
+   PLAY WIN REPEAT
+========================================= */
+
+.tagline {
+  margin-top: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  color: #f3ead8;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  letter-spacing: 6px;
+
+  text-transform: uppercase;
+
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.08);
+}
+
+
+.tag-icon {
+  color: #ffcf72;
+
+  font-size: 15px;
+
+  letter-spacing: 0;
+
+  text-shadow:
+    0 0 7px rgba(255, 207, 114, 0.45);
+}
+
+
+/* =========================================
+   GOLD DIVIDER
+========================================= */
+
+.mini-divider {
+  margin-top: 13px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+.mini-divider span {
+  width: 65px;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 202, 98, 0.80),
+      transparent
+    );
+}
+
+
+.mini-divider i {
+  display: block;
+
+  width: 8px;
+  height: 8px;
+
+  transform:
+    rotate(45deg);
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffd073,
+      #b75cff
+    );
+
+  box-shadow:
+    0 0 8px rgba(190, 79, 255, 0.38);
+}
+
+
+/* =========================================
+   COMPACT LOADING AREA
+========================================= */
+
+.loading-section {
+  width: 390px;
+
+  max-width: 75vw;
+
+  margin-top: 24px;
+}
+
+
+/* Loading outer bar */
+
+.loading-bar {
+  width: 100%;
+  height: 11px;
+
+  padding: 2px;
+
+  border-radius: 999px;
+
+  border:
+    1px solid rgba(178, 79, 255, 0.65);
+
+  background:
+    rgba(12, 5, 22, 0.78);
+
+  box-shadow:
+    inset 0 0 6px rgba(89, 28, 145, 0.40),
+    0 0 8px rgba(170, 70, 255, 0.12);
+
+  overflow: hidden;
+}
+
+
+/* Progress fill */
+
+.loading-progress {
+  position: relative;
+
+  width: 0%;
+  height: 100%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #8530ef 0%,
+      #bd50ff 48%,
+      #ef90ff 100%
+    );
+
+  box-shadow:
+    0 0 5px rgba(194, 91, 255, 0.80),
+    0 0 10px rgba(169, 72, 255, 0.32);
+
+  overflow: hidden;
+
+  transition:
+    width 0.1s linear;
+}
+
+
+/* Shimmer */
+
+.bar-shine {
+  position: absolute;
+
+  top: 0;
+  left: -45px;
+
+  width: 45px;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.80),
+      transparent
+    );
+
+  transform:
+    skewX(-20deg);
+
+  animation:
+    loadingShine 1.5s linear infinite;
+}
+
+
+@keyframes loadingShine {
+
+  from {
+    left: -45px;
+  }
+
+  to {
+    left: 120%;
+  }
+
+}
+
+
+/* =========================================
+   LOADING TEXT + PERCENT
+========================================= */
+
+.loading-info {
+  width: 100%;
+
+  margin-top: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+.loading-text {
+  color: #ddd5e7;
+
+  font-size: 11px;
+  font-weight: 400;
+
+  letter-spacing: 4px;
+
+  text-transform: uppercase;
+}
+
+
+.loading-percent {
+  color: #c584ff;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-shadow:
+    0 0 6px rgba(197, 132, 255, 0.48);
+}
+
+
+/* Animated dots */
+
+.dots::after {
+  content: "";
+
+  animation:
+    loadingDots 1.4s steps(4, end) infinite;
+}
+
+
+@keyframes loadingDots {
+
+  0% {
+    content: "";
+  }
+
+  25% {
+    content: ".";
+  }
+
+  50% {
+    content: "..";
+  }
+
+  75%,
+  100% {
+    content: "...";
+  }
+
+}
+
+
+/* =========================================
+   TABLETS
+========================================= */
+
+@media (max-width: 768px) {
+
+  .logo-stage {
+    width: 300px;
+    height: 300px;
+  }
+
+
+  .royal-logo {
+    width: 225px;
+  }
+
+
+  .logo-glow {
+    width: 200px;
+    height: 200px;
+  }
+
+
+  .logo-shadow {
+    width: 120px;
+    bottom: 34px;
+  }
+
+
+  .orbit-1 {
+    width: 250px;
+    height: 102px;
+  }
+
+
+  .orbit-2 {
+    width: 238px;
+    height: 96px;
+  }
+
+
+  .tagline {
+    font-size: 12px;
+    letter-spacing: 3px;
+    gap: 8px;
+  }
+
+
+  .tag-icon {
+    font-size: 12px;
+  }
+
+
+  .loading-section {
+    width: 300px;
+    max-width: 80vw;
+  }
+
+
+  .loading-bar {
+    height: 9px;
+  }
+
+
+  .loading-text {
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+
+
+  .loading-percent {
+    font-size: 10px;
+  }
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 450px) {
+
+  .intro-content {
+    padding: 12px;
+  }
+
+
+  .logo-stage {
+    width: 260px;
+    height: 260px;
+  }
+
+
+  .royal-logo {
+    width: 195px;
+  }
+
+
+  .logo-glow {
+    width: 175px;
+    height: 175px;
+  }
+
+
+  .orbit-1 {
+    width: 216px;
+    height: 87px;
+  }
+
+
+  .orbit-2 {
+    width: 205px;
+    height: 82px;
+  }
+
+
+  .tagline {
+    font-size: 10px;
+    letter-spacing: 2px;
+    gap: 6px;
+  }
+
+
+  .mini-divider span {
+    width: 38px;
+  }
+
+
+  .loading-section {
+    width: 260px;
+
+    margin-top: 20px;
+  }
+
+
+  .loading-info {
+    margin-top: 10px;
+  }
+
+
+/* =========================================
+   ROYAL CASH INTRO - COMPLETE CSS
+========================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+}

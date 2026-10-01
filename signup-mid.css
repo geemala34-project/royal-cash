@@ -1,0 +1,299 @@
+
+/* =========================================================
+   ROYAL CASH — LOGIN / JOIN NOW MODAL
+   Add this CSS file after your existing mid-page.css
+   ========================================================= */
+
+.rc-auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .22s ease, visibility .22s ease;
+}
+
+.rc-auth-modal.rc-auth-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.rc-auth-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 2, 10, .76);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+.rc-auth-card {
+  position: relative;
+  z-index: 2;
+  width: min(410px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 28px 30px 25px;
+  border: 1px solid rgba(161, 0, 255, .55);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(161,0,255,.18), transparent 42%),
+    linear-gradient(180deg, #180b2b 0%, #08050f 100%);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.58),
+    0 0 30px rgba(161,0,255,.16);
+  transform: translateY(16px) scale(.97);
+  transition: transform .25s ease;
+}
+
+.rc-auth-open .rc-auth-card {
+  transform: translateY(0) scale(1);
+}
+
+.rc-auth-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  font-size: 25px;
+  line-height: 34px;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.rc-auth-close:hover {
+  background: rgba(255,20,147,.18);
+  color: #ff69bd;
+}
+
+.rc-auth-logo {
+  display: block;
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  margin: 0 auto 9px;
+  filter: drop-shadow(0 0 13px rgba(161,0,255,.42));
+}
+
+.rc-auth-card h2 {
+  margin: 0;
+  text-align: center;
+  color: #fff;
+  font-size: 25px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.rc-auth-card h2 span {
+  color: #ff3fa8;
+}
+
+.rc-auth-subtitle {
+  margin: 7px 0 20px;
+  text-align: center;
+  color: #aaa3b7;
+  font-size: 13px;
+}
+
+.rc-auth-field {
+  position: relative;
+  margin-bottom: 11px;
+}
+
+.rc-auth-field input {
+  width: 100%;
+  height: 45px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid rgba(161,0,255,.28);
+  border-radius: 12px;
+  outline: none;
+  background: rgba(255,255,255,.045);
+  color: #fff;
+  font-size: 13px;
+  transition: .2s ease;
+}
+
+.rc-auth-field input::placeholder {
+  color: #777181;
+}
+
+.rc-auth-field input:focus {
+  border-color: #b52cff;
+  background: rgba(161,0,255,.07);
+  box-shadow: 0 0 0 3px rgba(161,0,255,.09);
+}
+
+.rc-password-field input {
+  padding-right: 45px;
+}
+
+.rc-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #9d96a9;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.rc-auth-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 3px 1px 15px;
+  color: #9991a7;
+  font-size: 11px;
+}
+
+.rc-auth-options label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rc-auth-options input {
+  accent-color: #a100ff;
+}
+
+.rc-auth-options a {
+  color: #c76cff;
+  text-decoration: none;
+}
+
+.rc-auth-submit {
+  width: 100%;
+  height: 45px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #8f00ff 0%, #ff1493 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 7px 20px rgba(255,20,147,.18);
+  transition: transform .18s ease, filter .18s ease;
+}
+
+.rc-auth-submit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.rc-auth-submit span {
+  margin-left: 5px;
+}
+
+.rc-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 17px 0 13px;
+  color: #686171;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.rc-auth-divider::before,
+.rc-auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,.08);
+}
+
+.rc-google-btn {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 12px;
+  background: rgba(255,255,255,.055);
+  color: #f4f2f7;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s ease;
+}
+
+.rc-google-btn:hover {
+  background: rgba(255,255,255,.09);
+  border-color: rgba(255,255,255,.22);
+}
+
+.rc-google-icon {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: #4285f4;
+  font-size: 14px;
+  font-weight: 900;
+  font-family: Arial, sans-serif;
+}
+
+.rc-auth-switch {
+  margin: 17px 0 0;
+  text-align: center;
+  color: #88818f;
+  font-size: 12px;
+}
+
+.rc-auth-switch button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ff3fa8;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+body.rc-auth-body-lock {
+  overflow: hidden;
+}
+
+@media (max-width: 520px) {
+  .rc-auth-modal {
+    padding: 14px;
+  }
+
+  .rc-auth-card {
+    width: min(390px, 100%);
+    padding: 24px 20px 21px;
+    border-radius: 19px;
+  }
+
+  .rc-auth-logo {
+    width: 66px;
+    height: 66px;
+  }
+
+  .rc-auth-card h2 {
+    font-size: 22px;
+  }
+
+  .rc-auth-subtitle {
+    margin-bottom: 16px;
+  } 
+  }
