@@ -1,4 +1,3 @@
-
 /* =========================================================
    ROYAL CASH — MID PAGE JS
    ========================================================= */
@@ -74,7 +73,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     showPage(0);
 });
-/* ========================================================= 
+
+
+/* =========================================================
    ROYAL CASH — SUBSCRIBE API CONNECTION
    ========================================================= */
 
@@ -82,6 +83,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const subscribeScreen = document.getElementById("subscribeScreen");
     const subscribeBtn = document.getElementById("subscribeBtn");
+
+
+    // Google se aaya token URL mein ho to save karo (LAZMI)
+    const params = new URLSearchParams(location.search);
+    const urlToken = params.get("token");
+
+    if (urlToken) {
+        localStorage.setItem("token", urlToken);
+
+        const urlName = params.get("name");
+        const urlEmail = params.get("email");
+
+        if (urlName || urlEmail) {
+            localStorage.setItem("user", JSON.stringify({
+                name: urlName ? decodeURIComponent(urlName) : "",
+                email: urlEmail ? decodeURIComponent(urlEmail) : ""
+            }));
+        }
+
+        window.history.replaceState({}, "", "mid-page.html");
+    }
 
 
     function openSubscribeScreen() {
@@ -99,6 +121,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
+    // Google se naya user aaye to subscribe screen khud-ba-khud kholo
+    if (params.get("google") === "true") {
+        openSubscribeScreen();
+    }
 
 
     subscribeBtn?.addEventListener("click", async () => {
@@ -192,5 +219,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 });
-
-
