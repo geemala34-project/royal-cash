@@ -638,7 +638,38 @@
 
             </form>
         </section>
-    </div>
+    </div
+
+      <!-- ============ OTP MODAL ============ -->
+<style>
+  #rcOtpModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px}
+  #rcOtpModal.rc-otp-open{display:flex}
+  .rc-otp-box{background:#101024;border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:32px 28px;width:100%;max-width:380px;text-align:center;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .rc-otp-box h2{margin:0 0 8px;font-size:24px}
+  .rc-otp-box p{color:#9aa0b4;font-size:14px;margin:0 0 18px}
+  .rc-otp-box p span{color:#fff;font-weight:600}
+  #rcOtpInput{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#1a1a2e;color:#fff;font-size:20px;text-align:center;letter-spacing:8px;margin-bottom:14px;box-sizing:border-box}
+  .rc-otp-btn{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#7b2ff7,#f107a3);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+  .rc-otp-timer{margin-top:14px;font-size:13px;color:#9aa0b4}
+  .rc-otp-timer span{color:#fff;font-weight:700}
+  #rcResendOtp{margin-top:8px;background:none;border:none;color:#c084fc;font-size:14px;font-weight:600;cursor:pointer;display:none}
+  #rcResendOtp:disabled{color:#555;cursor:not-allowed}
+  .rc-otp-close{margin-top:12px;background:none;border:none;color:#9aa0b4;cursor:pointer;font-size:13px}
+</style>
+<div id="rcOtpModal" aria-hidden="true">
+  <div class="rc-otp-box">
+    <h2>Verify Your Email</h2>
+    <p>Enter the code sent to<br><span id="rcOtpEmail"></span></p>
+    <form id="rcOtpForm">
+      <input type="text" id="rcOtpInput" maxlength="6" inputmode="numeric" placeholder="------" autocomplete="one-time-code" />
+      <button type="submit" class="rc-otp-btn">Verify & Continue →</button>
+    </form>
+    <div class="rc-otp-timer" id="rcOtpTimerWrap">Resend code in <span id="rcOtpTimer">60</span>s</div>
+    <button id="rcResendOtp">Resend Code</button>
+    <br>
+    <button class="rc-otp-close" data-close-auth>Cancel</button>
+  </div>
+</div>
 
   <!-- =========================================================
          MANDATORY SUBSCRIBE SCREEN
