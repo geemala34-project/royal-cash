@@ -3098,3 +3098,47 @@ body.subscribe-locked {
     }
 
 }
+
+/* ==========================================================
+   ROYAL CASH — MOBILE FIX (file ke sab se END mein paste karo)
+   ========================================================== */
+@media (max-width: 768px){
+
+  /* 1) Puri website ke buniyadi fixes */
+  body{overflow-x:hidden !important}
+  img{max-width:100%;height:auto}
+  input,select,textarea{font-size:16px !important} /* iOS auto-zoom band */
+
+  /* 2) Login / Signup modals */
+  #rcLoginModal,#rcSignupModal{padding:14px}
+
+  /* 3) OTP modal (stylish wala) */
+  #rcOtpModal{padding:12px}
+  .rc-otp-box{padding:28px 18px;border-radius:20px}
+  .rc-otp-box h2{font-size:22px}
+  .rc-otp-digits{gap:7px}
+  .rc-otp-digit{width:40px;height:50px;font-size:20px;border-radius:12px}
+  .rc-otp-logo{width:52px;height:52px}
+
+  /* 4) Subscribe screen */
+  #subscribeScreen{padding:24px 16px}
+
+  /* 5) Forgot + Reset password pages */
+  .fp-card,.rp-card{margin:0 16px;padding:32px 22px;border-radius:20px}
+  .fp-card h1,.rp-card h1{font-size:24px}
+  .fp-card p,.rp-card p{font-size:13px}
+  .fp-btn,.rp-btn{font-size:15px;padding:14px}
+  .fp-logo-wrap,.rp-icon-wrap{width:80px;height:80px}
+  .fp-logo{width:56px;height:56px}
+  .rp-icon-wrap svg{inset:22px;width:36px;height:36px}
+  .blob{filter:blur(70px);opacity:.4}
+  .blob1,.b1{width:280px;height:280px}
+  .blob2,.b2{width:260px;height:260px}
+  .b3{display:none}
+}
+
+/* Chhote phones (iPhone SE waghera) */
+@media (max-width: 380px){
+  .rc-otp-digit{width:36px;height:46px;font-size:18px}
+  .rc-otp-digits{gap:5px}
+}
