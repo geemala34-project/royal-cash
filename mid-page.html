@@ -640,29 +640,47 @@
         </section>
     </div>
 
-      <!-- ============ OTP MODAL ============ -->
+<!-- ============ OTP MODAL (STYLISH) ============ -->
 <style>
-  #rcOtpModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px}
+  #rcOtpModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px}
   #rcOtpModal.rc-otp-open{display:flex}
-  .rc-otp-box{background:#101024;border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:32px 28px;width:100%;max-width:380px;text-align:center;color:#fff;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-  .rc-otp-box h2{margin:0 0 8px;font-size:24px}
-  .rc-otp-box p{color:#9aa0b4;font-size:14px;margin:0 0 18px}
+  .rc-otp-box{position:relative;background:linear-gradient(#12122b,#12122b) padding-box,linear-gradient(135deg,#7b2ff7,#f107a3,#ffd700) border-box;border:2px solid transparent;border-radius:24px;padding:36px 28px;width:100%;max-width:400px;text-align:center;color:#fff;box-shadow:0 25px 70px rgba(123,47,247,.35)}
+  .rc-otp-logo{width:64px;height:64px;object-fit:contain;margin-bottom:10px;filter:drop-shadow(0 0 12px rgba(255,215,0,.4))}
+  .rc-otp-box h2{margin:0 0 6px;font-size:26px;letter-spacing:.5px}
+  .rc-otp-box h2 span{background:linear-gradient(135deg,#c084fc,#f107a3);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .rc-otp-box p{color:#9aa0b4;font-size:14px;margin:0 0 20px;line-height:1.6}
   .rc-otp-box p span{color:#fff;font-weight:600}
-  #rcOtpInput{width:100%;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#1a1a2e;color:#fff;font-size:20px;text-align:center;letter-spacing:8px;margin-bottom:14px;box-sizing:border-box}
-  .rc-otp-btn{width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(135deg,#7b2ff7,#f107a3);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
-  .rc-otp-timer{margin-top:14px;font-size:13px;color:#9aa0b4}
-  .rc-otp-timer span{color:#fff;font-weight:700}
-  #rcResendOtp{margin-top:8px;background:none;border:none;color:#c084fc;font-size:14px;font-weight:600;cursor:pointer;display:none}
+  .rc-otp-digits{display:flex;gap:10px;justify-content:center;margin-bottom:20px}
+  .rc-otp-digit{width:48px;height:56px;border-radius:14px;border:1.5px solid rgba(255,255,255,.15);background:#1a1a2e;color:#fff;font-size:24px;font-weight:700;text-align:center;outline:none;transition:border-color .2s,box-shadow .2s;caret-color:#c084fc}
+  .rc-otp-digit:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168,85,247,.25)}
+  .rc-otp-btn{width:100%;padding:15px;border:none;border-radius:14px;background:linear-gradient(135deg,#7b2ff7,#f107a3);color:#fff;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;box-shadow:0 8px 24px rgba(241,7,163,.35);transition:transform .15s,box-shadow .15s}
+  .rc-otp-btn:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(241,7,163,.45)}
+  .rc-otp-btn:active{transform:translateY(0)}
+  .rc-otp-timer{margin-top:16px;font-size:13px;color:#9aa0b4}
+  .rc-otp-timer span{display:inline-block;min-width:34px;padding:3px 10px;border-radius:20px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.4);color:#e9d5ff;font-weight:700}
+  #rcResendOtp{margin-top:10px;background:none;border:none;color:#c084fc;font-size:14px;font-weight:600;cursor:pointer;display:none}
   #rcResendOtp:disabled{color:#555;cursor:not-allowed}
-  .rc-otp-close{margin-top:12px;background:none;border:none;color:#9aa0b4;cursor:pointer;font-size:13px}
+  #rcResendOtp:hover:not(:disabled){text-decoration:underline}
+  .rc-otp-close{margin-top:14px;background:none;border:none;color:#9aa0b4;cursor:pointer;font-size:13px}
+  .rc-otp-close:hover{color:#fff}
+  @keyframes rcOtpPop{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}
+  #rcOtpModal.rc-otp-open .rc-otp-box{animation:rcOtpPop .25s ease-out}
 </style>
 <div id="rcOtpModal" aria-hidden="true">
   <div class="rc-otp-box">
-    <h2>Verify Your Email</h2>
-    <p>Enter the code sent to<br><span id="rcOtpEmail"></span></p>
+    <img src="royal-cash-logo.png" alt="Royal Cash" class="rc-otp-logo">
+    <h2>Verify Your <span>Email</span></h2>
+    <p>Enter the 6-digit code sent to<br><span id="rcOtpEmail"></span></p>
     <form id="rcOtpForm">
-      <input type="text" id="rcOtpInput" maxlength="6" inputmode="numeric" placeholder="------" autocomplete="one-time-code" />
-      <button type="submit" class="rc-otp-btn">Verify & Continue →</button>
+      <div class="rc-otp-digits">
+        <input type="text" class="rc-otp-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code" />
+        <input type="text" class="rc-otp-digit" maxlength="1" inputmode="numeric" />
+        <input type="text" class="rc-otp-digit" maxlength="1" inputmode="numeric" />
+        <input type="text" class="rc-otp-digit" maxlength="1" inputmode="numeric" />
+        <input type="text" class="rc-otp-digit" maxlength="1" inputmode="numeric" />
+        <input type="text" class="rc-otp-digit" maxlength="1" inputmode="numeric" />
+      </div>
+      <button type="submit" class="rc-otp-btn">Verify →</button>
     </form>
     <div class="rc-otp-timer" id="rcOtpTimerWrap">Resend code in <span id="rcOtpTimer">60</span>s</div>
     <button id="rcResendOtp">Resend Code</button>
