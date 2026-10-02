@@ -1,6 +1,6 @@
 /* =========================================================
    ROYAL CASH — AUTH CONNECTION
-   LOGIN + SIGNUP + OTP + TIMER + RESEND + JWT + SUBSCRIBE
+   LOGIN + SIGNUP + OTP + TIMER + RESEND + JWT
 ========================================================= */
 
 (function () {
@@ -18,7 +18,6 @@ const otpForm = document.getElementById("rcOtpForm");
 
 const subscribeScreen = document.getElementById("subscribeScreen");
 
-// OTP verify tak email/password yaad rakhne ke liye
 let pendingEmail = "";
 let pendingPassword = "";
 let otpTimerInterval = null;
@@ -116,7 +115,7 @@ loginForm?.addEventListener("submit", async(e)=>{
         if(data.subscribed){
             window.location.href="home.html";
         } else {
-            window.location.href="mid-page.html";
+            openSubscribe();
         }
     }
     catch(error){
@@ -150,11 +149,9 @@ signupForm?.addEventListener("submit", async(e)=>{
         const data = await response.json();
         if(!response.ok){ alert(data.message || "Signup failed"); return; }
 
-        // OTP step ke liye yaad rakho
         pendingEmail = email;
         pendingPassword = password;
 
-        // OTP modal kholo + timer shuru
         const otpEmailLabel = document.getElementById("rcOtpEmail");
         if(otpEmailLabel) otpEmailLabel.textContent = email;
         const otpInput = document.getElementById("rcOtpInput");
@@ -178,7 +175,6 @@ otpForm?.addEventListener("submit", async(e)=>{
     if(!otp){ alert("Please enter the OTP"); return; }
 
     try{
-        // 1. OTP verify karo
         const verifyRes = await fetch(`${API_URL}/auth/verify-otp`,{
             method:"POST",
             headers:{"Content-Type":"application/json"},
@@ -187,7 +183,6 @@ otpForm?.addEventListener("submit", async(e)=>{
         const verifyData = await verifyRes.json();
         if(!verifyRes.ok){ alert(verifyData.message || "Invalid OTP"); return; }
 
-        // 2. Auto-login taake token mil jaye
         const loginRes = await fetch(`${API_URL}/auth/login`,{
             method:"POST",
             headers:{"Content-Type":"application/json"},
@@ -203,8 +198,7 @@ otpForm?.addEventListener("submit", async(e)=>{
         pendingEmail = "";
         pendingPassword = "";
 
-        // 3. Subscribe page par
-        window.location.href = "mid-page.html";
+        openSubscribe();
     }
     catch(error){
         console.log(error);
@@ -282,6 +276,7 @@ document.querySelectorAll("[data-google-sample]")
 
 function openSubscribe(){
     if(!subscribeScreen) return;
+    closeModals();
     subscribeScreen.classList.add("show");
     subscribeScreen.setAttribute("aria-hidden","false");
 }
