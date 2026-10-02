@@ -17,10 +17,47 @@ const signupForm = document.getElementById("rcSignupForm");
 const otpForm = document.getElementById("rcOtpForm");
 
 const subscribeScreen = document.getElementById("subscribeScreen");
+const otpDigits = [...document.querySelectorAll(".rc-otp-digit")];
 
 let pendingEmail = "";
 let pendingPassword = "";
 let otpTimerInterval = null;
+
+
+/* ================= OTP DIGITS ================= */
+
+function getOtpValue(){
+    return otpDigits.map(d => d.value).join("");
+}
+
+function clearOtpDigits(){
+    otpDigits.forEach(d => d.value = "");
+    setTimeout(() => { if(otpDigits[0]) otpDigits[0].focus(); }, 150);
+}
+
+otpDigits.forEach((input, i) => {
+    input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g, "").slice(0, 1);
+        if (input.value && i < otpDigits.length - 1) {
+            otpDigits[i + 1].focus();
+        }
+    });
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !input.value && i > 0) {
+            otpDigits[i - 1].focus();
+        }
+    });
+    input.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData.getData("text") || "").replace(/\D/g, "").slice(0, 6);
+        text.split("").forEach((ch, j) => {
+            if (otpDigits[j]) otpDigits[j].value = ch;
+        });
+        if (text.length > 0) {
+            otpDigits[Math.min(text.length, otpDigits.length - 1)].focus();
+        }
+    });
+});
 
 
 /* ================= MODALS ================= */
@@ -37,6 +74,7 @@ function openOtpModal(){
     if(!otpModal) return;
     otpModal.classList.add("rc-otp-open");
     otpModal.setAttribute("aria-hidden","false");
+    clearOtpDigits();
 }
 
 function closeModals(){
@@ -154,8 +192,6 @@ signupForm?.addEventListener("submit", async(e)=>{
 
         const otpEmailLabel = document.getElementById("rcOtpEmail");
         if(otpEmailLabel) otpEmailLabel.textContent = email;
-        const otpInput = document.getElementById("rcOtpInput");
-        if(otpInput) otpInput.value = "";
         openOtpModal();
         startOtpTimer();
     }
@@ -171,8 +207,8 @@ signupForm?.addEventListener("submit", async(e)=>{
 otpForm?.addEventListener("submit", async(e)=>{
     e.preventDefault();
 
-    const otp = document.getElementById("rcOtpInput").value.trim();
-    if(!otp){ alert("Please enter the OTP"); return; }
+    const otp = getOtpValue();
+    if(otp.length !== 6){ alert("Please enter the complete 6-digit code"); return; }
 
     try{
         const verifyRes = await fetch(`${API_URL}/auth/verify-otp`,{
@@ -248,8 +284,7 @@ document.getElementById("rcResendOtp")?.addEventListener("click", async () => {
             if(resendBtn) resendBtn.disabled = false;
             return;
         }
-        const otpInput = document.getElementById("rcOtpInput");
-        if(otpInput) otpInput.value = "";
+        clearOtpDigits();
         alert("New code sent to your email");
         if(resendBtn) resendBtn.disabled = false;
         startOtpTimer();
