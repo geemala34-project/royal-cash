@@ -2435,7 +2435,7 @@ if (bonus.includes("%")) {
 </script>
 
 <script>
-/* Logout Bear — bye bye scene */
+/* Logout Bear — FIXED (modal content safe) */
 (function(){
   var modal = document.getElementById('logoutModal');
   if(!modal) return;
@@ -2461,10 +2461,16 @@ if (bonus.includes("%")) {
         '<div class="rc-bear-arm left"></div><div class="rc-bear-arm right"></div>' +
         '<div class="rc-bear-leg left"></div><div class="rc-bear-leg right"></div>' +
       '</div>';
-    if(emojiEl && emojiEl.parentElement && emojiEl.parentElement!==modal){
-      emojiEl.parentElement.replaceWith(scene);
-    } else if(emojiEl){
-      emojiEl.replaceWith(scene);
+    if(emojiEl){
+      var circle = emojiEl.parentElement;
+      var safeToHide = circle && circle!==modal && !(circle.querySelector && circle.querySelector('button'));
+      if(safeToHide){
+        circle.style.display = 'none';
+        circle.parentElement.insertBefore(scene, circle);
+      } else {
+        emojiEl.style.display = 'none';
+        circle.insertBefore(scene, emojiEl);
+      }
     } else {
       modal.insertBefore(scene, modal.firstChild);
     }
