@@ -1129,6 +1129,61 @@
 }
 </style>
 
+<style>
+/* ======= PREMIUM Profile Dropdown ======= */
+.rc-dropdown{
+  background:linear-gradient(rgba(20,20,46,.88),rgba(20,20,46,.88)) padding-box,
+             linear-gradient(135deg,#7b2ff7,#f107a3,#c084fc,#7b2ff7) border-box !important;
+  border:2px solid transparent !important;
+  border-radius:20px !important;
+  padding:10px !important;
+  min-width:250px;
+  -webkit-backdrop-filter:blur(18px);
+  backdrop-filter:blur(18px);
+  box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 44px rgba(123,47,247,.28) !important;
+  animation:rcDdIn .32s cubic-bezier(.2,.9,.25,1.15);
+  transform-origin:top right;
+  overflow:hidden;
+}
+.rc-dropdown::before{
+  content:"";position:absolute;top:0;left:12%;right:12%;height:1px;z-index:2;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+}
+@keyframes rcDdIn{
+  0%{opacity:0;transform:translateY(-12px) scale(.95)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+.rc-dropdown > *{
+  display:flex !important;align-items:center;gap:12px;
+  padding:13px 15px !important;margin:3px 0 !important;
+  border-radius:14px !important;color:#e5e7eb !important;
+  font-size:15px;font-weight:600;cursor:pointer;text-decoration:none !important;
+  background:transparent !important;border:none !important;
+  animation:rcItemIn .3s ease backwards;
+  transition:transform .2s,color .2s,box-shadow .2s !important;
+  position:relative;
+}
+.rc-dropdown > *:nth-child(1){animation-delay:.06s}
+.rc-dropdown > *:nth-child(2){animation-delay:.12s}
+.rc-dropdown > *:nth-child(3){animation-delay:.18s}
+@keyframes rcItemIn{
+  from{opacity:0;transform:translateX(-14px)}
+  to{opacity:1;transform:translateX(0)}
+}
+.rc-dropdown > * > span{margin-left:auto;color:#9aa0b4;transition:transform .2s,color .2s}
+.rc-dropdown > *:hover{
+  background:linear-gradient(135deg,rgba(123,47,247,.4),rgba(241,7,163,.4)) !important;
+  color:#fff !important;transform:translateX(6px);
+  box-shadow:0 6px 18px rgba(123,47,247,.35);
+}
+.rc-dropdown > *:hover > span{color:#fff;transform:translateX(4px)}
+.rc-dropdown > *:last-child:hover{
+  background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(241,7,163,.3)) !important;
+  box-shadow:0 6px 18px rgba(239,68,68,.3);
+}
+</style>
+
+  
 </head>
 <body>
 
@@ -1216,7 +1271,7 @@
     </div>
 
 
-<div class="profile-dropdown">
+<div class="profile-dropdown rc-dropdown">
 
 <div class="menu-item" id="myProfileBtn">            👤 My Profile
              <span class="menu-arrow">›</span>
