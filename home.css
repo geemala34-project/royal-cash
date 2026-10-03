@@ -7891,3 +7891,89 @@ body.rc-stage-open #logoutModal .logout-card{
     height:calc(100dvh - 184px) !important;
   }
 }
+
+
+/* =====================================================
+   AURORA NIGHT BACKDROP — pichay ka premium scene
+   ===================================================== */
+.rc-backdrop{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .7s ease;overflow:hidden;
+  background:linear-gradient(180deg,#0c0714 0%,#150b26 55%,#0c0714 100%);
+  box-shadow:inset 0 0 220px rgba(0,0,0,.85)}
+body.rc-stage-open .rc-backdrop{opacity:1}
+.rc-backdrop .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
+.rc-backdrop .b1{width:44vw;height:44vw;left:-8vw;top:-10vw;background:radial-gradient(circle,#7b2ff7,transparent 70%);animation:rcBlob1 16s ease-in-out infinite alternate}
+.rc-backdrop .b2{width:38vw;height:38vw;right:-6vw;top:30vh;background:radial-gradient(circle,#f107a3,transparent 70%);animation:rcBlob2 20s ease-in-out infinite alternate}
+.rc-backdrop .b3{width:30vw;height:30vw;left:30vw;bottom:-12vw;background:radial-gradient(circle,#38bdf8,transparent 70%);opacity:.35;animation:rcBlob3 24s ease-in-out infinite alternate}
+@keyframes rcBlob1{from{transform:translate(0,0) scale(1)}to{transform:translate(9vw,7vh) scale(1.15)}}
+@keyframes rcBlob2{from{transform:translate(0,0) scale(1.1)}to{transform:translate(-8vw,-6vh) scale(.95)}}
+@keyframes rcBlob3{from{transform:translate(0,0) scale(1)}to{transform:translate(6vw,-8vh) scale(1.2)}}
+.rc-backdrop .rc-stars{position:absolute;inset:0;
+  background-image:
+    radial-gradient(2px 2px at 12% 22%,rgba(255,255,255,.9),transparent 60%),
+    radial-gradient(1.5px 1.5px at 32% 68%,rgba(255,255,255,.7),transparent 60%),
+    radial-gradient(2px 2px at 55% 15%,rgba(255,255,255,.8),transparent 60%),
+    radial-gradient(1.5px 1.5px at 71% 42%,rgba(255,255,255,.6),transparent 60%),
+    radial-gradient(2px 2px at 84% 78%,rgba(255,255,255,.85),transparent 60%),
+    radial-gradient(1.5px 1.5px at 44% 88%,rgba(255,255,255,.65),transparent 60%),
+    radial-gradient(1.5px 1.5px at 8% 62%,rgba(255,255,255,.7),transparent 60%),
+    radial-gradient(2px 2px at 93% 28%,rgba(255,255,255,.75),transparent 60%),
+    radial-gradient(1.5px 1.5px at 64% 92%,rgba(255,255,255,.6),transparent 60%),
+    radial-gradient(1.5px 1.5px at 25% 45%,rgba(255,255,255,.65),transparent 60%);
+  animation:rcTwinkle 3.5s ease-in-out infinite alternate}
+@keyframes rcTwinkle{from{opacity:.35}to{opacity:1}}
+
+/* =====================================================
+   DASHBOARD PREMIUM MOTION — complete dashboard
+   ===================================================== */
+.rc-wave{position:absolute;top:0;left:0;right:0;height:110px;overflow:hidden;pointer-events:none;z-index:1}
+.rc-wave svg{position:absolute;top:0;left:-5%;width:110%;height:100%;display:block;animation:rcOcean 8s ease-in-out infinite alternate}
+.rc-wave svg.w2{animation-duration:12s;animation-delay:-4s;opacity:.85}
+@keyframes rcOcean{
+  0%{transform:translateX(-3%) translateY(2px) rotate(-.6deg)}
+  50%{transform:translateX(0) translateY(-5px) rotate(0deg)}
+  100%{transform:translateX(3%) translateY(2px) rotate(.6deg)}
+}
+.rc-progress{position:absolute;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none}
+.rc-progress-fill{height:100%;background:linear-gradient(90deg,#7b2ff7,#f107a3);transform:scaleX(0);transform-origin:left;box-shadow:0 0 12px rgba(241,7,163,.7)}
+body.rc-stage-open #profileDashboard .profile-title,
+body.rc-stage-open #profileDashboard .terms-header{
+  animation:rcTitleIn .55s cubic-bezier(.2,.9,.3,1.2) backwards;
+}
+@keyframes rcTitleIn{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+body.rc-stage-open #profileDashboard .terms-card,
+body.rc-stage-open #profileDashboard .detail-box,
+body.rc-stage-open #profileDashboard .user-card,
+body.rc-stage-open #profileDashboard .security-card{
+  animation:rcCardIn .5s cubic-bezier(.2,.9,.3,1.15) backwards;
+}
+@keyframes rcCardIn{from{opacity:0;transform:translateY(22px) scale(.98)}to{opacity:1;transform:none}}
+body.rc-stage-open #profileDashboard .terms-list .terms-card:nth-child(1){animation-delay:.1s}
+body.rc-stage-open #profileDashboard .terms-list .terms-card:nth-child(2){animation-delay:.17s}
+body.rc-stage-open #profileDashboard .terms-list .terms-card:nth-child(3){animation-delay:.24s}
+body.rc-stage-open #profileDashboard .terms-list .terms-card:nth-child(4){animation-delay:.31s}
+body.rc-stage-open #profileDashboard .terms-list .terms-card:nth-child(5){animation-delay:.38s}
+body.rc-stage-open #profileDashboard .terms-list .terms-card:nth-child(6){animation-delay:.45s}
+body.rc-stage-open #profileDashboard .details .detail-box:nth-child(1){animation-delay:.12s}
+body.rc-stage-open #profileDashboard .details .detail-box:nth-child(2){animation-delay:.2s}
+body.rc-stage-open #profileDashboard .details .detail-box:nth-child(3){animation-delay:.28s}
+body.rc-stage-open #profileDashboard .terms-card,
+body.rc-stage-open #profileDashboard .detail-box{
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease !important;
+}
+body.rc-stage-open #profileDashboard .terms-card:hover,
+body.rc-stage-open #profileDashboard .detail-box:hover{
+  transform:translateY(-5px) !important;
+  border-color:rgba(236,72,153,.65) !important;
+  box-shadow:0 16px 36px rgba(0,0,0,.4),0 0 24px rgba(168,85,247,.22) !important;
+}
+body.rc-stage-open #profileDashboard .terms-card-icon{
+  animation:rcIconFloat 4.5s ease-in-out infinite;
+}
+@keyframes rcIconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+body.rc-stage-open #profileDashboard .profile-menu.active{
+  animation:rcActiveGlow 2.6s ease-in-out infinite;
+}
+@keyframes rcActiveGlow{
+  0%,100%{box-shadow:0 8px 20px rgba(150,0,255,.20)}
+  50%{box-shadow:0 8px 30px rgba(236,0,255,.5)}
+}
