@@ -2375,27 +2375,59 @@ if (bonus.includes("%")) {
 </style>
 
 <script>
-/* Cinematic stage: body class + wave */
+/* Cinematic stage v2: backdrop + ocean wave + progress */
 (function(){
   var dash = document.getElementById('profileDashboard');
   var logoutM = document.getElementById('logoutModal');
 
-  function rcWave(){
-    if(!dash || dash.querySelector('.rc-wave')) return;
+  function rcBackdrop(){
+    if(document.querySelector('.rc-backdrop')) return;
+    var b = document.createElement('div');
+    b.className = 'rc-backdrop';
+    b.setAttribute('aria-hidden','true');
+    b.innerHTML = '<span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="rc-stars"></span>';
+    document.body.appendChild(b);
+  }
+
+  function rcOcean(){
+    if(!dash) return;
+    if(dash.querySelector('.rc-wave[data-v="2"]')) return;
+    var old = dash.querySelector('.rc-wave');
+    if(old) old.remove();
     var w = document.createElement('div');
     w.className = 'rc-wave';
+    w.setAttribute('data-v','2');
     w.setAttribute('aria-hidden','true');
-    w.innerHTML = '<svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,120 900,0 1200,60 L1200,120 L0,120 Z" fill="rgba(123,47,247,.22)"/><path d="M0,75 C350,25 950,115 1200,60 L1200,120 L0,120 Z" fill="rgba(241,7,163,.15)"/></svg>';
+    w.innerHTML =
+      '<svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,120 900,0 1200,60 L1200,120 L0,120 Z" fill="rgba(123,47,247,.20)"/></svg>' +
+      '<svg class="w2" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,75 C350,25 950,115 1200,60 L1200,120 L0,120 Z" fill="rgba(241,7,163,.15)"/></svg>';
     dash.insertBefore(w, dash.firstChild);
+  }
+
+  function rcBar(){
+    if(!dash || dash.querySelector('.rc-progress')) return;
+    var b = document.createElement('div');
+    b.className = 'rc-progress';
+    b.setAttribute('aria-hidden','true');
+    b.innerHTML = '<div class="rc-progress-fill"></div>';
+    dash.appendChild(b);
+    var fill = b.firstChild;
+    dash.addEventListener('scroll', function(){
+      var max = dash.scrollHeight - dash.clientHeight;
+      var r = max > 0 ? dash.scrollTop / max : 0;
+      fill.style.transform = 'scaleX(' + r + ')';
+      b.style.transform = 'translateY(' + dash.scrollTop + 'px)';
+    }, {passive:true});
   }
 
   function rcSync(){
     var dOpen = dash && getComputedStyle(dash).display !== 'none';
     var lOpen = logoutM && logoutM.classList.contains('show');
     document.body.classList.toggle('rc-stage-open', !!(dOpen || lOpen));
-    if(dOpen) rcWave();
+    if(dOpen){ rcOcean(); rcBar(); }
   }
 
+  rcBackdrop();
   if(dash) new MutationObserver(rcSync).observe(dash,{attributes:true,attributeFilter:['style','class']});
   if(logoutM) new MutationObserver(rcSync).observe(logoutM,{attributes:true,attributeFilter:['style','class']});
   rcSync();
