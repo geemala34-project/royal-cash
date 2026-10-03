@@ -2500,31 +2500,40 @@ if (bonus.includes("%")) {
 
   rcBearScene();
 })();
-</script>
-
 <script>
-/* Tab Guard — hamesha sirf 1 tab khula rahega */
+/* Tab Guard v3 — bulletproof: sirf 1 tab, har surat mein */
 (function(){
-  var ids = ['profileContent','securityContent','termsContent'];
-  var busy = false;
-  function hideOthers(showId){
-    if(busy) return;
-    busy = true;
-    ids.forEach(function(id){
-      if(id === showId) return;
-      var el = document.getElementById(id);
-      if(el && el.style.display !== 'none') el.style.display = 'none';
+  var tabs = ['profileContent','securityContent','termsContent'];
+  var btnMap = {
+    myProfileBtn:'profileContent',
+    myProfileTab:'profileContent',
+    securityTab:'securityContent',
+    termsTab:'termsContent',
+    termsDashboardTab:'termsContent'
+  };
+
+  function forceSingleTab(showId){
+    tabs.forEach(function(id){
+      var els = document.querySelectorAll('#'+id);
+      els.forEach(function(el){
+        if(id === showId){
+          el.style.setProperty('display','block','important');
+        } else {
+          el.style.setProperty('display','none','important');
+        }
+      });
     });
-    busy = false;
   }
-  ids.forEach(function(id){
-    var el = document.getElementById(id);
-    if(!el) return;
-    new MutationObserver(function(){
-      if(busy) return;
-      if(getComputedStyle(el).display !== 'none') hideOthers(id);
-    }).observe(el, {attributes:true, attributeFilter:['style','class']});
-  });
+
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    if(!t || !t.closest) return;
+    for(var btnId in btnMap){
+      if(t.closest('#'+btnId)){ forceSingleTab(btnMap[btnId]); break; }
+    }
+  }, true);
+
+  forceSingleTab('profileContent');
 })();
 </script>
 
