@@ -2502,6 +2502,31 @@ if (bonus.includes("%")) {
 })();
 </script>
 
+<script>
+/* Tab Guard — hamesha sirf 1 tab khula rahega */
+(function(){
+  var ids = ['profileContent','securityContent','termsContent'];
+  var busy = false;
+  function hideOthers(showId){
+    if(busy) return;
+    busy = true;
+    ids.forEach(function(id){
+      if(id === showId) return;
+      var el = document.getElementById(id);
+      if(el && el.style.display !== 'none') el.style.display = 'none';
+    });
+    busy = false;
+  }
+  ids.forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    new MutationObserver(function(){
+      if(busy) return;
+      if(getComputedStyle(el).display !== 'none') hideOthers(id);
+    }).observe(el, {attributes:true, attributeFilter:['style','class']});
+  });
+})();
+</script>
 
   
 </body>
