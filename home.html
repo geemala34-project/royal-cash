@@ -2374,5 +2374,34 @@ if (bonus.includes("%")) {
 }
 </style>
 
+<script>
+/* Cinematic stage: body class + wave */
+(function(){
+  var dash = document.getElementById('profileDashboard');
+  var logoutM = document.getElementById('logoutModal');
+
+  function rcWave(){
+    if(!dash || dash.querySelector('.rc-wave')) return;
+    var w = document.createElement('div');
+    w.className = 'rc-wave';
+    w.setAttribute('aria-hidden','true');
+    w.innerHTML = '<svg viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,120 900,0 1200,60 L1200,120 L0,120 Z" fill="rgba(123,47,247,.22)"/><path d="M0,75 C350,25 950,115 1200,60 L1200,120 L0,120 Z" fill="rgba(241,7,163,.15)"/></svg>';
+    dash.insertBefore(w, dash.firstChild);
+  }
+
+  function rcSync(){
+    var dOpen = dash && getComputedStyle(dash).display !== 'none';
+    var lOpen = logoutM && logoutM.classList.contains('show');
+    document.body.classList.toggle('rc-stage-open', !!(dOpen || lOpen));
+    if(dOpen) rcWave();
+  }
+
+  if(dash) new MutationObserver(rcSync).observe(dash,{attributes:true,attributeFilter:['style','class']});
+  if(logoutM) new MutationObserver(rcSync).observe(logoutM,{attributes:true,attributeFilter:['style','class']});
+  rcSync();
+})();
+</script>
+
+  
 </body>
 </html>
