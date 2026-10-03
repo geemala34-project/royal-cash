@@ -2434,6 +2434,69 @@ if (bonus.includes("%")) {
 })();
 </script>
 
+<script>
+/* Logout Bear — bye bye scene */
+(function(){
+  var modal = document.getElementById('logoutModal');
+  if(!modal) return;
+
+  function rcBearScene(){
+    if(modal.querySelector('.rc-bear-scene')) return;
+    var emojiEl = null;
+    var all = modal.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var el = all[i];
+      if(el.children.length===0 && el.textContent.trim()==='🚪'){ emojiEl = el; break; }
+    }
+    var scene = document.createElement('div');
+    scene.className = 'rc-bear-scene';
+    scene.setAttribute('aria-hidden','true');
+    scene.innerHTML =
+      '<div class="rc-bye-bubble">Bye! 👋</div>' +
+      '<div class="rc-door"><div class="rc-doorway"></div><div class="rc-door-panel"></div><div class="rc-door-frame"></div></div>' +
+      '<div class="rc-bear">' +
+        '<div class="rc-bear-ear left"></div><div class="rc-bear-ear right"></div>' +
+        '<div class="rc-bear-head"><div class="rc-bear-eye left"></div><div class="rc-bear-eye right"></div><div class="rc-bear-muzzle"></div></div>' +
+        '<div class="rc-bear-body"><div class="rc-bear-belly"></div></div>' +
+        '<div class="rc-bear-arm left"></div><div class="rc-bear-arm right"></div>' +
+        '<div class="rc-bear-leg left"></div><div class="rc-bear-leg right"></div>' +
+      '</div>';
+    if(emojiEl && emojiEl.parentElement && emojiEl.parentElement!==modal){
+      emojiEl.parentElement.replaceWith(scene);
+    } else if(emojiEl){
+      emojiEl.replaceWith(scene);
+    } else {
+      modal.insertBefore(scene, modal.firstChild);
+    }
+  }
+
+  var played = false, byeTimer = null;
+
+  modal.addEventListener('click', function(e){
+    var t = e.target;
+    var btn = t.closest ? t.closest('#confirmLogout') : null;
+    var cancel = t.closest ? t.closest('#cancelLogout') : null;
+    if(cancel){
+      played = false;
+      modal.classList.remove('rc-bye');
+      if(byeTimer){ clearTimeout(byeTimer); byeTimer = null; }
+      return;
+    }
+    if(btn && !played){
+      e.preventDefault();
+      e.stopPropagation();
+      played = true;
+      rcBearScene();
+      modal.classList.add('rc-bye');
+      byeTimer = setTimeout(function(){ byeTimer = null; btn.click(); }, 3100);
+    }
+  }, true);
+
+  rcBearScene();
+})();
+</script>
+
+
   
 </body>
 </html>
