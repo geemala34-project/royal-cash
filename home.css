@@ -7978,4 +7978,20 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   50%{box-shadow:0 8px 30px rgba(236,0,255,.5)}
 }
 
+/* ===== DEPOSIT BUTTON — ROYAL PURPLE-PINK ===== */
+.deposit-box{
+  background:linear-gradient(90deg,#8f00ff 0%,#ff1493 100%) !important;
+  color:#fff !important;
+  border:none !important;
+  box-shadow:0 4px 14px rgba(255,20,147,.35) !important;
+  transition:filter .2s ease, box-shadow .2s ease !important;
+}
+.deposit-box:hover{
+  filter:brightness(1.12) !important;
+  box-shadow:0 6px 20px rgba(255,20,147,.5) !important;
+}
+.deposit-box .deposit-plus,
+.deposit-box span{
+  color:#fff !important;
+}
 
