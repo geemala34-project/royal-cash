@@ -460,9 +460,6 @@
 
 <style>
 /* HOVER SHOULD WORK — CARD MUST STAY INSIDE SCREEN */
-.compact-game-section .compact-game-row{
-    overflow:visible !important;
-}
 .compact-game-section .game-card{
     position:relative !important;
     z-index:1 !important;
@@ -1391,6 +1388,8 @@
 
 </div>
 
+  </div>
+
 </header>
 
 <section class="profile-dashboard" id="profileDashboard">
@@ -2216,7 +2215,6 @@ Update Password
       </section>
 
     </section>
-    </section>
   </main>
 
 
@@ -2434,10 +2432,17 @@ if (bonus.includes("%")) {
 })();
 </script>
 
-
 <script>
-/* Profile email display */
+/* Profile display: name + email + member since + VIP rank */
 (function(){
+  function rankFromScore(s){
+    s = s || 0;
+    if(s >= 2000) return 'Heroic';
+    if(s >= 500) return 'Diamond';
+    if(s >= 150) return 'Gold';
+    if(s >= 30) return 'Silver';
+    return 'Bronze';
+  }
   function fillProfile(){
     try{
       var user = JSON.parse(localStorage.getItem('user'));
@@ -2446,6 +2451,17 @@ if (bonus.includes("%")) {
       if(emailEl && user.email) emailEl.textContent = user.email;
       var nameEl = document.getElementById('profileName');
       if(nameEl && user.name) nameEl.textContent = user.name;
+      var sinceEl = document.getElementById('memberSince');
+      if(sinceEl && user.createdAt){
+        var d = new Date(user.createdAt);
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        sinceEl.textContent = months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+      }
+      var rank = user.vipRank || rankFromScore(user.activityScore);
+      var vipEl = document.getElementById('vipStatus');
+      if(vipEl) vipEl.textContent = rank;
+      var vipEl2 = document.getElementById('vipStatus2');
+      if(vipEl2) vipEl2.textContent = rank;
     }catch(e){}
   }
   document.addEventListener('DOMContentLoaded', fillProfile);
