@@ -2568,8 +2568,204 @@ if (bonus.includes("%")) {
   .site-header .mobile-account-strip .deposit-plus{
     font-size:14px !important;
   }
+
+  /* ---- DASHBOARD: sidebar -> compact horizontal tab bar ---- */
+  #profileDashboard .profile-sidebar .brand{
+    display:none !important;
+  }
+  #profileDashboard .profile-sidebar{
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    gap:8px !important;
+    width:100% !important;
+    min-width:0 !important;
+    height:auto !important;
+    flex:0 0 auto !important;
+    padding:10px 12px !important;
+    overflow:visible !important;
+    border-right:none !important;
+    border-bottom:1px solid rgba(255,255,255,.08) !important;
+  }
+  #profileDashboard .profile-sidebar .profile-menu{
+    flex:1 1 0 !important;
+    min-width:0 !important;
+    max-width:none !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    margin:0 !important;
+    min-height:42px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    padding:0 8px !important;
+    font-size:12px !important;
+    border-radius:12px !important;
+  }
+  #profileDashboard .profile-sidebar .profile-menu span{
+    display:none !important;
+  }
 }
 </style>
+
+<script id="rc-mobile-header-js">
+/* PRO mobile header: one slim row [logo][wallet][reward][deposit][avatar]
+   + slim nav row. Moves the strip buttons into the top row on mobile.
+   Desktop untouched. */
+(function(){
+  function fixHeader(){
+    if(!window.matchMedia('(max-width:700px)').matches) return;
+    var header = document.querySelector('.site-header');
+    var ht = document.querySelector('.header-top');
+    if(!header || !ht || ht.dataset.moved) return;
+    var strip = ht.querySelector('.mobile-account-strip');
+    var group = ht.querySelector('.desktop-account-group');
+    if(strip && group){
+      var wallet = strip.querySelector('.wallet-box');
+      var reward = strip.querySelector('.reward-box');
+      var deposit = strip.querySelector('.deposit-box');
+      if(wallet) ht.insertBefore(wallet, group);
+      if(reward) ht.insertBefore(reward, group);
+      if(deposit) ht.insertBefore(deposit, group);
+    }
+    ['.mobile-main-nav', '.logout-modal'].forEach(function(sel){
+      var el = ht.querySelector(sel);
+      if(el && el.parentElement === ht) header.appendChild(el);
+    });
+    ht.dataset.moved = '1';
+    /* dashboard close button ko tab row me lao */
+    var dashClose = document.querySelector('#profileDashboard .profile-close');
+    var dashBar = document.querySelector('#profileDashboard .profile-sidebar');
+    if(dashClose && dashBar && !dashClose.dataset.moved){
+      dashBar.appendChild(dashClose);
+      dashClose.dataset.moved = '1';
+    }
+    /* dashboard tab label chhota taake 3 tabs ek line me fit hon */
+    var termsTab = document.querySelector('#termsDashboardTab');
+    if(termsTab && !termsTab.dataset.short){
+      termsTab.innerHTML = termsTab.innerHTML.replace(/Terms[\s\S]*?Conditions/i, 'Terms');
+      termsTab.dataset.short = '1';
+    }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fixHeader);
+  else fixHeader();
+})();
+</script>
+
+
+<style id="rc-mobile-pro-header">
+/* =========================================================
+   PRO MOBILE HEADER — compact & professional (<=700px)
+   Row 1: [logo][wallet][reward][deposit][avatar]
+   Row 2: slim nav. Desktop untouched.
+   ========================================================= */
+@media (max-width:700px){
+  .site-header .header-top{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    padding:8px 10px !important;
+    min-height:0 !important;
+    flex-wrap:nowrap !important;
+  }
+  .site-header .header-top .brand-mark{
+    flex:0 0 auto !important;
+    margin:0 !important;
+  }
+  .site-header .header-top .brand-mark img{
+    width:40px !important;
+    height:40px !important;
+  }
+  /* compact wallet + reward pills */
+  .site-header .header-top > .wallet-box,
+  .site-header .header-top > .reward-box{
+    flex:0 0 auto !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:3px !important;
+    padding:7px 9px !important;
+    margin:0 !important;
+    border-radius:12px !important;
+    font-size:12px !important;
+    white-space:nowrap !important;
+    min-width:0 !important;
+  }
+  .site-header .header-top > .wallet-box .balance-label,
+  .site-header .header-top > .reward-box .balance-label{
+    display:none !important;
+  }
+  .site-header .header-top > .wallet-box .balance-value,
+  .site-header .header-top > .reward-box .balance-value{
+    font-size:13px !important;
+  }
+  .site-header .header-top > .reward-box::before{
+    content:"\1F381";
+    font-size:13px !important;
+  }
+  /* compact deposit */
+  .site-header .header-top > .deposit-box{
+    flex:0 0 auto !important;
+    padding:8px 12px !important;
+    margin:0 !important;
+    font-size:12px !important;
+    border-radius:12px !important;
+    white-space:nowrap !important;
+  }
+  .site-header .header-top > .deposit-box .deposit-plus{
+    font-size:14px !important;
+  }
+  /* profile pushed right; avatar-only on mobile (name+arrow hidden) */
+  .site-header .header-top .user-profile{
+    margin-left:auto !important;
+    flex:0 0 auto !important;
+  }
+  .site-header .header-top .user-profile .user-info,
+  .site-header .header-top .user-profile .arrow{
+    display:none !important;
+  }
+  .site-header .header-top .user-profile .user-top{
+    gap:0 !important;
+    padding:0 !important;
+  }
+  .site-header .header-top .user-profile .user-avatar{
+    width:38px !important;
+    height:38px !important;
+  }
+  .site-header .header-top{
+    gap:6px !important;
+  }
+  /* old strip emptied -> hide */
+  .site-header .mobile-account-strip{
+    display:none !important;
+  }
+  /* slim nav row */
+  .site-header .mobile-main-nav{
+    display:flex !important;
+    align-items:center !important;
+    gap:2px !important;
+    padding:2px 10px 8px !important;
+    margin:0 !important;
+  }
+  .site-header .mobile-main-nav .nav-link{
+    font-size:13px !important;
+    padding:6px 12px !important;
+  }
+
+  /* dashboard close button: tab row ka hissa (overlap khatam) */
+  #profileDashboard .profile-sidebar .profile-close{
+    position:static !important;
+    margin-left:auto !important;
+    flex:0 0 auto !important;
+    width:34px !important;
+    height:34px !important;
+    min-width:34px !important;
+    align-self:center !important;
+    transform:none !important;
+    top:auto !important;
+    right:auto !important;
+  }
+}</style>
 
 </body>
 </html>
