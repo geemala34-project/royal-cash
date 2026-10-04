@@ -2435,6 +2435,29 @@ if (bonus.includes("%")) {
 </script>
 
 
+<script>
+/* Profile email display */
+(function(){
+  function fillProfile(){
+    try{
+      var user = JSON.parse(localStorage.getItem('user'));
+      if(!user) return;
+      var emailEl = document.getElementById('profileEmail');
+      if(emailEl && user.email) emailEl.textContent = user.email;
+      var nameEl = document.getElementById('profileName');
+      if(nameEl && user.name) nameEl.textContent = user.name;
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', fillProfile);
+  fillProfile();
+  var dash = document.getElementById('profileDashboard');
+  if(dash){
+    new MutationObserver(function(){
+      if(getComputedStyle(dash).display !== 'none') fillProfile();
+    }).observe(dash, {attributes:true, attributeFilter:['style','class']});
+  }
+})();
+</script>
 
   
 </body>
