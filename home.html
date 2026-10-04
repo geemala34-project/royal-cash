@@ -2479,12 +2479,12 @@ if (bonus.includes("%")) {
 <style id="rc-mobile-fix">
 /* =========================================================
    ROYAL CASH — MOBILE FIX (700px and below)
-   Game cards: single horizontal swipe row + arrow buttons
-   Header: mobile layout safeguards (desktop untouched)
+   Game cards: single horizontal swipe row (no arrows)
+   Header: wallet strip fits inside screen (desktop untouched)
    ========================================================= */
 @media (max-width:700px){
 
-  /* ---- GAME CARDS: one swipeable row ---- */
+  /* ---- GAME CARDS: one swipeable row, no arrows ---- */
   .compact-game-section .compact-game-row{
     display:flex !important;
     flex-wrap:nowrap !important;
@@ -2494,53 +2494,43 @@ if (bonus.includes("%")) {
     scroll-snap-type:x mandatory !important;
     scrollbar-width:none !important;
     gap:12px !important;
-    padding:4px 44px 14px 4px !important;
+    padding:4px !important;
   }
   .compact-game-section .compact-game-row::-webkit-scrollbar{
     display:none !important;
   }
   .compact-game-section .compact-game-row .game-card{
-    flex:0 0 150px !important;
-    width:150px !important;
-    min-width:150px !important;
-    max-width:150px !important;
+    flex:0 0 158px !important;
+    width:158px !important;
+    min-width:158px !important;
+    max-width:158px !important;
     scroll-snap-align:start !important;
   }
 
-  /* ---- Arrow buttons (added by JS) ---- */
-  .compact-game-section .compact-game-row-wrap{
-    position:relative !important;
+  /* ---- HEADER: rows stack vertically inside the sticky header ----
+     (home.css sets header{display:flex} which squeezes the rows
+      side-by-side on mobile -> overlapping mess when scrolled) */
+  .site-header{
+    display:block !important;
   }
-  .rc-row-arrow{
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    position:absolute !important;
-    top:50% !important;
-    transform:translateY(-50%) !important;
-    width:36px !important;
-    height:36px !important;
-    border-radius:50% !important;
-    border:none !important;
-    background:linear-gradient(135deg,#8f00ff 0%,#ff1493 100%) !important;
-    color:#fff !important;
-    font-size:20px !important;
-    line-height:1 !important;
-    cursor:pointer !important;
-    z-index:60 !important;
-    box-shadow:0 4px 14px rgba(255,20,147,.45) !important;
-    transition:opacity .2s ease !important;
-  }
-  .rc-row-arrow.prev{ left:0 !important; }
-  .rc-row-arrow.next{ right:0 !important; }
-
-  /* ---- HEADER safeguards ---- */
   .site-header .header-top{
     flex-wrap:wrap !important;
   }
-  .site-header .desktop-main-nav,
-  .site-header .desktop-account-group{
+  .site-header .desktop-main-nav{
     display:none !important;
+  }
+  /* Profile (avatar + dropdown) mobile par NAZAR AANA chahiye:
+     poora group mat chhupao — sirf desktop buttons chhupao */
+  .site-header .desktop-account-group{
+    display:contents !important;
+  }
+  .site-header .desktop-account-group > button{
+    display:none !important;
+  }
+  .site-header .desktop-account-group .user-profile{
+    display:block !important;
+    position:relative !important;
+    margin-left:auto !important;
   }
   .site-header .mobile-main-nav{
     display:flex !important;
@@ -2548,59 +2538,38 @@ if (bonus.includes("%")) {
   .site-header .mobile-account-strip{
     display:flex !important;
     width:100% !important;
-    gap:8px !important;
+    max-width:100% !important;
+    gap:6px !important;
+    padding:0 10px !important;
+    margin:0 !important;
     box-sizing:border-box !important;
   }
   .site-header .mobile-account-strip .deposit-box,
   .site-header .mobile-account-strip .balance-box{
     flex:1 1 0 !important;
+    width:auto !important;
     min-width:0 !important;
+    max-width:none !important;
+    margin:0 !important;
+    padding:8px 4px !important;
+    font-size:11px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    justify-content:center !important;
+    align-items:center !important;
   }
-}
-@media (min-width:701px){
-  .rc-row-arrow{ display:none !important; }
+  .site-header .mobile-account-strip .balance-label{
+    font-size:9px !important;
+    letter-spacing:0 !important;
+  }
+  .site-header .mobile-account-strip .balance-value{
+    font-size:12px !important;
+  }
+  .site-header .mobile-account-strip .deposit-plus{
+    font-size:14px !important;
+  }
 }
 </style>
-
-<script id="rc-mobile-arrows-js">
-/* Mobile game-row arrows: ‹ › scroll the card row */
-(function(){
-  function init(){
-    document.querySelectorAll('.compact-game-row-wrap').forEach(function(wrap){
-      var row = wrap.querySelector('.compact-game-row');
-      if(!row || wrap.querySelector('.rc-row-arrow')) return;
-      var prev = document.createElement('button');
-      prev.type = 'button';
-      prev.className = 'rc-row-arrow prev';
-      prev.setAttribute('aria-label','Previous games');
-      prev.innerHTML = '‹';
-      var next = document.createElement('button');
-      next.type = 'button';
-      next.className = 'rc-row-arrow next';
-      next.setAttribute('aria-label','Next games');
-      next.innerHTML = '›';
-      wrap.appendChild(prev);
-      wrap.appendChild(next);
-      function step(){
-        var card = row.querySelector('.game-card');
-        return (card ? card.offsetWidth + 12 : 162) * 2;
-      }
-      prev.addEventListener('click', function(){ row.scrollBy({left:-step(), behavior:'smooth'}); });
-      next.addEventListener('click', function(){ row.scrollBy({left:step(), behavior:'smooth'}); });
-      function edges(){
-        var max = row.scrollWidth - row.clientWidth - 4;
-        prev.style.opacity = row.scrollLeft <= 4 ? '.35' : '1';
-        next.style.opacity = row.scrollLeft >= max ? '.35' : '1';
-      }
-      row.addEventListener('scroll', edges, {passive:true});
-      window.addEventListener('resize', edges);
-      edges();
-    });
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-})();
-</script>
 
 </body>
 </html>
