@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Cash — Admin Panel</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+:root{--bg:#0a0618;--bg2:#120b28;--card:#1a1033;--border:#3d2a6e;--pink:#ff4ecd;--purple:#a855f7;--gold:#ffd700;--txt:#f0eaff;--mut:#9d8cc9;--green:#22c55e;--red:#ef4444;--grad:linear-gradient(135deg,#a855f7,#ff4ecd)}
+body{background:var(--bg);color:var(--txt);min-height:100vh}
+.hidden{display:none!important}
+/* ---------- LOGIN ---------- */
+#loginWrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 30% 20%,#2a1655 0%,var(--bg) 60%);padding:20px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:400px;box-shadow:0 0 60px rgba(168,85,247,.25);text-align:center}
+.login-card h1{font-size:28px;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px}
+.login-card p{color:var(--mut);margin-bottom:25px;font-size:14px}
+.login-card input{width:100%;padding:13px 15px;margin-bottom:15px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--txt);font-size:15px;outline:none}
+.login-card input:focus{border-color:var(--pink);box-shadow:0 0 10px rgba(255,78,205,.3)}
+.login-card button{width:100%;padding:14px;background:var(--grad);border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:.2s}
+.login-card button:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(255,78,205,.4)}
+#loginErr{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+/* ---------- LAYOUT ---------- */
+#panel{display:flex;min-height:100vh}
+#sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;position:fixed;height:100vh;overflow-y:auto;z-index:10}
+#sidebar .logo{padding:0 20px 20px;font-size:22px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-btn{display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;background:none;border:none;color:var(--mut);font-size:15px;cursor:pointer;border-left:3px solid transparent;transition:.2s;text-align:left}
+.nav-btn:hover{color:var(--txt);background:rgba(168,85,247,.1)}
+.nav-btn.active{color:#fff;background:rgba(168,85,247,.15);border-left-color:var(--pink)}
+.nav-btn .ico{font-size:18px;width:24px;text-align:center}
+#logoutBtn{margin:20px;padding:12px;width:calc(100% - 40px);background:rgba(239,68,68,.12);border:1px solid var(--red);color:var(--red);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600}
+#main{flex:1;margin-left:240px;padding:0;min-width:0}
+#topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 30px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+#topbar h2{font-size:20px}
+#adminBadge{background:var(--grad);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700}
+.sec{padding:30px;display:none}
+.sec.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* ---------- CARDS / TABLES ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;margin-bottom:25px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad)}
+.stat-card .lbl{color:var(--mut);font-size:13px;margin-bottom:8px}
+.stat-card .val{font-size:32px;font-weight:800}
+.stat-card .ico2{position:absolute;right:18px;top:18px;font-size:30px;opacity:.25}
+.panel-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:20px}
+.panel-box h3{margin-bottom:16px;font-size:17px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:12px;color:var(--mut);font-weight:600;border-bottom:1px solid var(--border);font-size:12px;text-transform:uppercase}
+td{padding:12px;border-bottom:1px solid rgba(61,42,110,.4);vertical-align:middle}
+tr:hover td{background:rgba(168,85,247,.05)}
+.btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:.2s}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-purple{background:var(--grad);color:#fff}
+.btn-ghost{background:rgba(168,85,247,.12);border:1px solid var(--border);color:var(--txt)}
+.btn:hover{transform:translateY(-1px);opacity:.92}
+.btn-sm{padding:6px 12px;font-size:12px}
+.badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase}
+.badge-pending{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid var(--gold)}
+.badge-approved{background:rgba(34,197,94,.15);color:var(--green);border:1px solid var(--green)}
+.badge-rejected{background:rgba(239,68,68,.15);color:var(--red);border:1px solid var(--red)}
+.badge-active{background:rgba(34,197,94,.15);color:var(--green)}
+.badge-off{background:rgba(157,140,201,.15);color:var(--mut)}
+input[type=text],input[type=number],input[type=url],textarea,select{width:100%;padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;color:var(--txt);font-size:14px;outline:none;margin-bottom:12px}
+input:focus,textarea:focus,select:focus{border-color:var(--pink)}
+textarea{resize:vertical;min-height:80px}
+label.flbl{display:block;color:var(--mut);font-size:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.empty{color:var(--mut);text-align:center;padding:30px;font-size:14px}
+/* ---------- MODAL ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(5,2,15,.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:18px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;animation:popIn .25s}
+@keyframes popIn{from{transform:scale(.93);opacity:0}to{transform:none;opacity:1}}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-head h3{font-size:18px}
+.modal-x{background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer}
+.modal-body{padding:24px}
+.dep-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(61,42,110,.4);font-size:14px}
+.dep-row .k{color:var(--mut)}
+.dep-row .v{font-weight:600;text-align:right}
+#depShot{width:100%;border-radius:10px;margin:12px 0;border:1px solid var(--border);max-height:300px;object-fit:contain;background:#000}
+.modal-foot{padding:18px 24px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end}
+/* ---------- TOAST / POPUP ---------- */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--pink);border-radius:14px;padding:16px 20px;z-index:200;box-shadow:0 0 30px rgba(255,78,205,.35);max-width:340px;animation:slideIn .3s;cursor:pointer}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+#toast h4{color:var(--pink);margin-bottom:6px;font-size:15px}
+#toast p{font-size:13px;color:var(--txt)}
+#newDepPop{position:fixed;top:20px;right:20px;z-index:200;background:linear-gradient(135deg,#1a1033,#2a1655);border:2px solid var(--gold);border-radius:16px;padding:20px;max-width:360px;box-shadow:0 0 40px rgba(255,215,0,.3);animation:popIn .3s}
+#newDepPop h4{color:var(--gold);margin-bottom:8px}
+#newDepPop p{font-size:13px;margin-bottom:12px}
+.img-prev{width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+@media(max-width:768px){#sidebar{width:64px}#sidebar .logo,#sidebar .nav-btn span.txt,#logoutBtn span{display:none}#sidebar .nav-btn{justify-content:center;padding:14px 0}#main{margin-left:64px}.form-row{grid-template-columns:1fr}#topbar{padding:12px 16px}.sec{padding:16px}}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginWrap">
+  <div class="login-card">
+    <h1>👑 Royal Cash</h1>
+    <p>Admin Control Panel</p>
+    <input type="text" id="liEmail" placeholder="Admin email">
+    <input type="password" id="liPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Login →</button>
+    <div id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ============ PANEL ============ -->
+<div id="panel" class="hidden">
+<aside id="sidebar">
+  <div class="logo">👑 Royal Cash</div>
+  <button class="nav-btn active" onclick="showSec('dashboard',this)"><span class="ico">📊</span><span class="txt">Dashboard</span></button>
+  <button class="nav-btn" onclick="showSec('deposits',this)"><span class="ico">💰</span><span class="txt">Deposits</span><span id="depCount" class="badge badge-pending hidden" style="margin-left:auto"></span></button>
+  <button class="nav-btn" onclick="showSec('users',this)"><span class="ico">👥</span><span class="txt">Users</span></button>
+  <button class="nav-btn" onclick="showSec('payments',this)"><span class="ico">💳</span><span class="txt">Payment Methods</span></button>
+  <button class="nav-btn" onclick="showSec('ticker',this)"><span class="ico">📢</span><span class="txt">Tickers</span></button>
+  <button class="nav-btn" onclick="showSec('slider',this)"><span class="ico">🖼️</span><span class="txt">Slider</span></button>
+  <button class="nav-btn" onclick="showSec('offers',this)"><span class="ico">🎁</span><span class="txt">Offers</span></button>
+  <button class="nav-btn" onclick="showSec('notify',this)"><span class="ico">🔔</span><span class="txt">Notifications</span></button>
+  <button id="logoutBtn" onclick="doLogout()"><span>🚪 Logout</span></button>
+</aside>
+<main id="main">
+<div id="topbar">
+  <h2 id="secTitle">Dashboard</h2>
+  <span id="adminBadge">👑 Admin</span>
+</div>
+
+<!-- DASHBOARD -->
+<div class="sec active" id="sec-dashboard">
+  <div class="cards" id="statCards"></div>
+  <div class="panel-box">
+    <h3>⏳ Recent Pending Deposits</h3>
+    <div id="dashPending"><div class="empty">Loading...</div></div>
+  </div>
+</div>
+
+<!-- DEPOSITS -->
+<div class="sec" id="sec-deposits">
+  <div class="panel-box">
+    <h3>💰 Deposit Requests <button class="btn btn-ghost btn-sm" style="float:right" onclick="loadDeposits()">🔄 Refresh</button></h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>User</th><th>Amount</th><th>Method</th><th>Txn ID</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="depTable"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- USERS -->
+<div class="sec" id="sec-users">
+  <div class="panel-box">
+    <h3>👥 All Users <button class="btn btn-ghost btn-sm" style="float:right" onclick="loadUsers()">🔄 Refresh</button></h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Wallet</th><th>Score</th><th>Joined</th></tr></thead>
+      <tbody id="userTable"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- PAYMENT METHODS -->
+<div class="sec" id="sec-payments">
+  <div class="panel-box">
+    <h3>➕ Add Payment Method</h3>
+    <div class="form-row">
+      <div><label class="flbl">Name (e.g. JazzCash)</label><input type="text" id="pmName" placeholder="Method name"></div>
+      <div><label class="flbl">Active</label><select id="pmActive"><option value="true">Yes</option><option value="false">No</option></select></div>
+    </div>
+    <label class="flbl">Details / Link / Account info</label>
+    <textarea id="pmDetails" placeholder="Account number, link, instructions..."></textarea>
+    <button class="btn btn-purple" onclick="addMethod()">Add Method</button>
+  </div>
+  <div class="panel-box">
+    <h3>💳 Payment Methods</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Name</th><th>Details</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="pmTable"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="sec" id="sec-ticker">
+  <div class="panel-box">
+    <h3>📢 Top Ticker <span class="badge badge-active">scrolling</span></h3>
+    <label class="flbl">Content</label>
+    <textarea id="tickTop" placeholder="Top ticker text..."></textarea>
+    <button class="btn btn-purple" onclick="saveTicker('top')">💾 Save Top Ticker</button>
+  </div>
+  <div class="panel-box">
+    <h3>📢 Mid-Page Ticker <span class="badge badge-active">edge-to-edge</span></h3>
+    <label class="flbl">Content</label>
+    <textarea id="tickMid" placeholder="Mid ticker text..."></textarea>
+    <button class="btn btn-purple" onclick="saveTicker('mid')">💾 Save Mid Ticker</button>
+  </div>
+</div>
+
+<!-- SLIDER -->
+<div class="sec" id="sec-slider">
+  <div class="panel-box">
+    <h3>➕ Add Slide Poster</h3>
+    <label class="flbl">Image URL</label>
+    <input type="url" id="slImg" placeholder="https://...poster.jpg">
+    <div class="form-row">
+      <div><label class="flbl">Title (optional)</label><input type="text" id="slTitle" placeholder="Poster title"></div>
+      <div><label class="flbl">Order</label><input type="number" id="slOrder" value="0" min="0"></div>
+    </div>
+    <button class="btn btn-purple" onclick="addSlide()">Add Slide</button>
+  </div>
+  <div class="panel-box">
+    <h3>🖼️ Slides</h3>
+    <div id="slideList"></div>
+  </div>
+</div>
+
+<!-- OFFERS -->
+<div class="sec" id="sec-offers">
+  <div class="panel-box">
+    <h3>➕ Publish Offer / Promo</h3>
+    <label class="flbl">Type</label>
+    <select id="ofType" onchange="document.getElementById('ofImgWrap').style.display=this.value==='image'?'block':'none'"><option value="text">📝 Text</option><option value="image">🖼️ Poster Image</option></select>
+    <label class="flbl">Content / Text</label>
+    <textarea id="ofContent" placeholder="Offer text..."></textarea>
+    <div id="ofImgWrap" style="display:none"><label class="flbl">Image URL</label><input type="url" id="ofImg" placeholder="https://...poster.jpg"></div>
+    <button class="btn btn-purple" onclick="addOffer()">🚀 Publish Offer</button>
+  </div>
+  <div class="panel-box">
+    <h3>🎁 Offers</h3>
+    <div id="offerList"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="sec" id="sec-notify">
+  <div class="panel-box">
+    <h3>📣 Broadcast to All Users</h3>
+    <label class="flbl">Title</label>
+    <input type="text" id="ntTitle" placeholder="Notification title">
+    <label class="flbl">Message</label>
+    <textarea id="ntMsg" placeholder="Message for all users..."></textarea>
+    <button class="btn btn-purple" onclick="broadcast()">📤 Send to All</button>
+  </div>
+  <div class="panel-box">
+    <h3>🔔 Recent Notifications</h3>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>User</th><th>Title</th><th>Message</th><th>Date</th></tr></thead>
+      <tbody id="ntTable"></tbody>
+    </table></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ============ DEPOSIT MODAL ============ -->
+<div id="depModalBg" class="modal-bg hidden">
+  <div class="modal">
+    <div class="modal-head"><h3 id="depModalTitle">Deposit Request</h3><button class="modal-x" onclick="closeDepModal()">✕</button></div>
+    <div class="modal-body" id="depModalBody"></div>
+    <div class="modal-foot" id="depModalFoot"></div>
+  </div>
+</div>
+
+<div id="toastBox"></div>
+<div id="popBox"></div>
+
+<script>
+const API='https://royal-cash-backend-production-04cf.up.railway.app';
+let TOKEN=localStorage.getItem('rc_admin_token')||'';
+let lastPendingIds=new Set();
+
+const H=()=>({'Content-Type':'application/json','Authorization':'Bearer '+TOKEN});
+async function api(m,p,b){const r=await fetch(API+p,{method:m,headers:H(),body:b?JSON.stringify(b):undefined});if(!r.ok){const t=await r.text();throw new Error(t||r.status)}return r.json();}
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtD=d=>new Date(d).toLocaleString();
+function toast(t,m){const e=document.createElement('div');e.id='toast';e.innerHTML='<h4>'+esc(t)+'</h4><p>'+esc(m)+'</p>';e.onclick=()=>e.remove();document.getElementById('toastBox').appendChild(e);setTimeout(()=>e.remove(),5000);}
+
+/* ---------- AUTH ---------- */
+async function doLogin(){
+  const email=document.getElementById('liEmail').value.trim();
+  const pass=document.getElementById('liPass').value;
+  const err=document.getElementById('loginErr');err.textContent='';
+  if(!email||!pass){err.textContent='Email aur password likho!';return;}
+  try{
+    const r=await fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||'Login failed');
+    if(d.user.role!=='admin'){err.textContent='⛔ Sirf admin login kar sakta hai!';return;}
+    TOKEN=d.accessToken;localStorage.setItem('rc_admin_token',TOKEN);
+    document.getElementById('adminBadge').textContent='👑 '+esc(d.user.name);
+    enterPanel();
+  }catch(e){err.textContent=e.message;}
+}
+function doLogout(){localStorage.removeItem('rc_admin_token');TOKEN='';location.reload();}
+function enterPanel(){
+  document.getElementById('loginWrap').classList.add('hidden');
+  document.getElementById('panel').classList.remove('hidden');
+  loadDashboard();loadDeposits(true);
+  setInterval(checkNewDeposits,20000);
+}
+function showSec(id,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('secTitle').textContent=btn.querySelector('.txt').textContent;
+  if(id==='dashboard')loadDashboard();
+  if(id==='deposits')loadDeposits();
+  if(id==='users')loadUsers();
+  if(id==='payments')loadMethods();
+  if(id==='ticker')loadTickers();
+  if(id==='slider')loadSlides();
+  if(id==='offers')loadOffers();
+  if(id==='notify')loadNotifs();
+}
+
+/* ---------- DASHBOARD ---------- */
+async function loadDashboard(){
+  try{
+    const s=await api('GET','/api/admin/stats');
+    document.getElementById('statCards').innerHTML=
+      card('👥','Total Users',s.totalUsers)+
+      card('⏳','Pending Deposits',s.pendingDeposits)+
+      card('✅','Approved',s.approvedDeposits)+
+      card('💵','Total Deposited','$'+Number(s.totalDeposited).toFixed(2))+
+      card('🎁','Active Offers',s.activeOffers);
+    const p=await api('GET','/api/deposits/pending');
+    document.getElementById('dashPending').innerHTML=p.length?p.slice(0,5).map(d=>
+      '<div class="dep-row"><span class="k">'+esc(d.user.name)+'</span><span class="v">$'+d.amount+' <span class="badge badge-pending">pending</span></span></div>'
+    ).join(''):'<div class="empty">No pending deposits 🎉</div>';
+    updateDepBadge(p.length);
+  }catch(e){document.getElementById('statCards').innerHTML='<div class="empty">Error: '+esc(e.message)+'</div>';}
+}
+function card(ico,lbl,val){return '<div class="stat-card"><span class="ico2">'+ico+'</span><div class="lbl">'+lbl+'</div><div class="val">'+val+'</div></div>';}
+function updateDepBadge(n){const b=document.getElementById('depCount');if(n>0){b.textContent=n;b.classList.remove('hidden');}else b.classList.add('hidden');}
+
+/* ---------- DEPOSITS ---------- */
+let allDeps=[];
+async function loadDeposits(silent){
+  try{
+    allDeps=await api('GET','/api/deposits/pending');
+    updateDepBadge(allDeps.length);
+    const tb=document.getElementById('depTable');
+    tb.innerHTML=allDeps.length?allDeps.map(d=>'<tr>'+
+      '<td><b>'+esc(d.user.name)+'</b><br><small style="color:var(--mut)">'+esc(d.user.email)+'</small></td>'+
+      '<td><b>$'+d.amount+'</b></td>'+
+      '<td>'+esc(d.paymentMethod?d.paymentMethod.name:'-')+'</td>'+
+      '<td><small>'+esc(d.transactionId)+'</small></td>'+
+      '<td><small>'+fmtD(d.createdAt)+'</small></td>'+
+      '<td><span class="badge badge-pending">pending</span></td>'+
+      '<td><button class="btn btn-purple btn-sm" onclick="openDep(\''+d.id+'\')">👁 View</button></td>'+
+    '</tr>').join(''):'<tr><td colspan="7"><div class="empty">No pending deposits 🎉</div></td></tr>';
+    if(!silent)allDeps.forEach(d=>lastPendingIds.add(d.id));
+  }catch(e){if(!silent)toast('Error',e.message);}
+}
+function openDep(id){
+  const d=allDeps.find(x=>x.id===id);if(!d)return;
+  document.getElementById('depModalTitle').textContent="💰 "+d.user.name+"'s Deposit Request";
+  document.getElementById('depModalBody').innerHTML=
+    row('User',esc(d.user.name)+' ('+esc(d.user.email)+')')+
+    row('Amount','<b style="font-size:20px;color:var(--gold)">$'+d.amount+'</b>')+
+    row('Method',esc(d.paymentMethod?d.paymentMethod.name:'-'))+
+    row('Method Details','<small>'+esc(d.paymentMethod?d.paymentMethod.details:'-')+'</small>')+
+    row('Transaction ID','<code>'+esc(d.transactionId)+'</code>')+
+    row('Date',fmtD(d.createdAt))+
+    '<label class="flbl" style="margin-top:10px">📸 Payment Screenshot (proof)</label>'+
+    '<img id="depShot" src="'+esc(d.screenshotUrl)+'" onerror="this.outerHTML=\'<div class=empty>Screenshot nahi khul raha</div>\'">';
+  document.getElementById('depModalFoot').innerHTML=
+    '<button class="btn btn-red" onclick="decideDep(\''+d.id+'\',\'reject\')">❌ Reject</button>'+
+    '<button class="btn btn-green" onclick="decideDep(\''+d.id+'\',\'approve\')">✅ Approve & Credit $'+d.amount+'</button>';
+  document.getElementById('depModalBg').classList.remove('hidden');
+}
+function row(k,v){return '<div class="dep-row"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>';}
+function closeDepModal(){document.getElementById('depModalBg').classList.add('hidden');}
+async function decideDep(id,act){
+  if(!confirm(act==='approve'?'Approve karke wallet mein $ add kar dun?':'Reject kar dun?'))return;
+  try{
+    await api('PUT','/api/deposits/'+id+'/'+act);
+    toast(act==='approve'?'✅ Approved':'❌ Rejected',act==='approve'?'Wallet credited!':'User notified.');
+    closeDepModal();loadDeposits();loadDashboard();
+  }catch(e){toast('Error',e.message);}
+}
+async function checkNewDeposits(){
+  try{
+    const p=await api('GET','/api/deposits/pending');
+    updateDepBadge(p.length);
+    p.forEach(d=>{
+      if(!lastPendingIds.has(d.id)){
+        lastPendingIds.add(d.id);
+        const e=document.createElement('div');e.id='newDepPop';
+        e.innerHTML='<h4>🔔 New Deposit!</h4><p><b>'+esc(d.user.name)+'</b> ne <b>$'+d.amount+'</b> ka deposit bheja hai!</p><button class="btn btn-purple btn-sm" onclick="this.parentElement.remove();showSec(\'deposits\',document.querySelectorAll(\'.nav-btn\')[1])">👁 Dekho</button> <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">✕</button>';
+        document.getElementById('popBox').appendChild(e);
+        setTimeout(()=>e.remove(),15000);
+      }
+    });
+  }catch(e){}
+}
+
+/* ---------- USERS ---------- */
+async function loadUsers(){
+  try{
+    const u=await api('GET','/api/admin/users');
+    document.getElementById('userTable').innerHTML=u.length?u.map(x=>'<tr>'+
+      '<td><b>'+esc(x.name)+'</b></td><td><small>'+esc(x.email)+'</small></td>'+
+      '<td>'+(x.role==='admin'?'<span class="badge badge-active">👑 admin</span>':'<span class="badge badge-off">user</span>')+'</td>'+
+      '<td><b>$'+Number(x.walletBalance).toFixed(2)+'</b></td><td>'+x.activityScore+'</td><td><small>'+fmtD(x.createdAt)+'</small></td>'+
+    '</tr>').join(''):'<tr><td colspan="6"><div class="empty">No users</div></td></tr>';
+  }catch(e){toast('Error',e.message);}
+}
+
+/* ---------- PAYMENT METHODS ---------- */
+async function loadMethods(){
+  try{
+    const m=await api('GET','/api/payment-methods/all');
+    document.getElementById('pmTable').innerHTML=m.length?m.map(x=>'<tr>'+
+      '<td><b>'+esc(x.name)+'</b></td><td><small>'+esc(x.details).substring(0,60)+'</small></td>'+
+      '<td>'+(x.isActive?'<span class="badge badge-active">active</span>':'<span class="badge badge-off">off</span>')+'</td>'+
+      '<td><button class="btn btn-ghost btn-sm" onclick="toggleMethod(\''+x.id+'\','+(!x.isActive)+')">'+(x.isActive?'⏸ Off':'▶ On')+'</button> '+
+      '<button class="btn btn-red btn-sm" onclick="delMethod(\''+x.id+'\')">🗑</button></td>'+
+    '</tr>').join(''):'<tr><td colspan="4"><div class="empty">Koi method nahi — upar se add karo!</div></td></tr>';
+  }catch(e){toast('Error',e.message);}
+}
+async function addMethod(){
+  const name=document.getElementById('pmName').value.trim();
+  const details=document.getElementById('pmDetails').value.trim();
+  const isActive=document.getElementById('pmActive').value==='true';
+  if(!name||!details){toast('⚠️','Name aur details likho!');return;}
+  try{await api('POST','/api/payment-methods',{name,details,isActive});
+    document.getElementById('pmName').value='';document.getElementById('pmDetails').value='';
+    toast('✅','Method add ho gaya!');loadMethods();
+  }catch(e){toast('Error',e.message);}
+}
+async function toggleMethod(id,on){try{await api('PUT','/api/payment-methods/'+id,{isActive:on});loadMethods();}catch(e){toast('Error',e.message);}}
+async function delMethod(id){if(!confirm('Delete kar dun?'))return;try{await api('DELETE','/api/payment-methods/'+id);loadMethods();}catch(e){toast('Error',e.message);}}
+
+/* ---------- TICKER ---------- */
+async function loadTickers(){
+  try{
+    const t=await api('GET','/api/ticker/top');document.getElementById('tickTop').value=t.content||'';
+    const m=await api('GET','/api/ticker/mid');document.getElementById('tickMid').value=m.content||'';
+  }catch(e){toast('Error',e.message);}
+}
+async function saveTicker(pos){
+  const c=document.getElementById(pos==='top'?'tickTop':'tickMid').value;
+  try{await api('PUT','/api/ticker/'+pos,{content:c});toast('✅','Ticker save ho gaya!');}
+  catch(e){toast('Error',e.message);}
+}
+
+/* ---------- SLIDER ---------- */
+async function loadSlides(){
+  try{
+    const s=await api('GET','/api/slider');
+    document.getElementById('slideList').innerHTML=s.length?s.map(x=>
+      '<div class="dep-row"><span class="k"><img class="img-prev" src="'+esc(x.imageUrl)+'" onerror="this.style.display=\'none\'"> '+esc(x.title||'Slide')+' <small>(order '+x.sortOrder+')</small></span>'+
+      '<span class="v"><button class="btn btn-ghost btn-sm" onclick="toggleSlide(\''+x.id+'\','+(!x.isActive)+')">'+(x.isActive?'⏸':'▶')+'</button> <button class="btn btn-red btn-sm" onclick="delSlide(\''+x.id+'\')">🗑</button></span></div>'
+    ).join(''):'<div class="empty">Koi slide nahi — upar se add karo!</div>';
+  }catch(e){toast('Error',e.message);}
+}
+async function addSlide(){
+  const imageUrl=document.getElementById('slImg').value.trim();
+  if(!imageUrl){toast('⚠️','Image URL likho!');return;}
+  try{await api('POST','/api/slider',{imageUrl,title:document.getElementById('slTitle').value.trim(),sortOrder:parseInt(document.getElementById('slOrder').value)||0});
+    document.getElementById('slImg').value='';document.getElementById('slTitle').value='';
+    toast('✅','Slide add ho gaya!');loadSlides();
+  }catch(e){toast('Error',e.message);}
+}
+async function toggleSlide(id,on){try{await api('PUT','/api/slider/'+id,{isActive:on});loadSlides();}catch(e){toast('Error',e.message);}}
+async function delSlide(id){if(!confirm('Delete kar dun?'))return;try{await api('DELETE','/api/slider/'+id);loadSlides();}catch(e){toast('Error',e.message);}}
+
+/* ---------- OFFERS ---------- */
+async function loadOffers(){
+  try{
+    const o=await api('GET','/api/offer');
+    document.getElementById('offerList').innerHTML=o.length?o.map(x=>
+      '<div class="dep-row"><span class="k">'+(x.type==='image'?'🖼️':'📝')+' '+(x.type==='image'?'<img class="img-prev" src="'+esc(x.imageUrl)+'" onerror="this.style.display=\'none\'">':esc((x.content||'').substring(0,50)))+'</span>'+
+      '<span class="v">'+(x.isActive?'<span class="badge badge-active">live</span>':'<span class="badge badge-off">off</span>')+' '+
+      '<button class="btn btn-ghost btn-sm" onclick="toggleOffer(\''+x.id+'\','+(!x.isActive)+')">'+(x.isActive?'⏸':'▶')+'</button> <button class="btn btn-red btn-sm" onclick="delOffer(\''+x.id+'\')">🗑</button></span></div>'
+    ).join(''):'<div class="empty">Koi offer nahi — upar se publish karo!</div>';
+  }catch(e){toast('Error',e.message);}
+}
+async function addOffer(){
+  const type=document.getElementById('ofType').value;
+  const content=document.getElementById('ofContent').value.trim();
+  const imageUrl=document.getElementById('ofImg').value.trim();
+  if(type==='text'&&!content){toast('⚠️','Text likho!');return;}
+  if(type==='image'&&!imageUrl){toast('⚠️','Image URL likho!');return;}
+  try{await api('POST','/api/offer',{type,content,imageUrl});
+    document.getElementById('ofContent').value='';document.getElementById('ofImg').value='';
+    toast('🚀','Offer publish ho gaya!');loadOffers();
+  }catch(e){toast('Error',e.message);}
+}
+async function toggleOffer(id,on){try{await api('PUT','/api/offer/'+id,{isActive:on});loadOffers();}catch(e){toast('Error',e.message);}}
+async function delOffer(id){if(!confirm('Delete kar dun?'))return;try{await api('DELETE','/api/offer/'+id);loadOffers();}catch(e){toast('Error',e.message);}}
+
+/* ---------- NOTIFICATIONS ---------- */
+async function loadNotifs(){
+  try{
+    const n=await api('GET','/api/notifications/all');
+    document.getElementById('ntTable').innerHTML=n.length?n.map(x=>'<tr>'+
+      '<td><small>'+esc(x.user?x.user.name+' ('+x.user.email+')':'All')+'</small></td>'+
+      '<td><b>'+esc(x.title)+'</b></td><td><small>'+esc(x.message).substring(0,80)+'</small></td><td><small>'+fmtD(x.createdAt)+'</small></td>'+
+    '</tr>').join(''):'<tr><td colspan="4"><div class="empty">Koi notification nahi</div></td></tr>';
+  }catch(e){toast('Error',e.message);}
+}
+async function broadcast(){
+  const title=document.getElementById('ntTitle').value.trim();
+  const message=document.getElementById('ntMsg').value.trim();
+  if(!title||!message){toast('⚠️','Title aur message likho!');return;}
+  if(!confirm('Saare users ko bhejun?'))return;
+  try{await api('POST','/api/notifications/broadcast',{title,message});
+    document.getElementById('ntTitle').value='';document.getElementById('ntMsg').value='';
+    toast('📤','Sab ko bhej diya!');loadNotifs();
+  }catch(e){toast('Error',e.message);}
+}
+
+/* ---------- INIT ---------- */
+document.getElementById('depModalBg').addEventListener('click',e=>{if(e.target.id==='depModalBg')closeDepModal();});
+if(TOKEN){
+  fetch(API+'/api/admin/stats',{headers:H()}).then(r=>{
+    if(r.ok)enterPanel();
+    else{localStorage.removeItem('rc_admin_token');TOKEN='';}
+  }).catch(()=>{localStorage.removeItem('rc_admin_token');TOKEN='';});
+}
+</script>
+</body>
+</html>
