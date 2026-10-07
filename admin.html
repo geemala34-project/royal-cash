@@ -118,6 +118,7 @@ label.flbl{display:block;color:var(--mut);font-size:12px;margin-bottom:6px;text-
   <button class="nav-btn" onclick="showSec('slider',this)"><span class="ico">🖼️</span><span class="txt">Slider</span></button>
   <button class="nav-btn" onclick="showSec('offers',this)"><span class="ico">🎁</span><span class="txt">Offers</span></button>
   <button class="nav-btn" onclick="showSec('notify',this)"><span class="ico">🔔</span><span class="txt">Notifications</span></button>
+  <button class="nav-btn" onclick="showSec('settings',this)"><span class="ico">⚙️</span><span class="txt">Settings</span></button>
   <button id="logoutBtn" onclick="doLogout()"><span>🚪 Logout</span></button>
 </aside>
 <main id="main">
@@ -248,6 +249,26 @@ label.flbl{display:block;color:var(--mut);font-size:12px;margin-bottom:6px;text-
   </div>
 </div>
 
+<!-- SETTINGS -->
+<div class="sec" id="sec-settings">
+  <div class="panel-box">
+    <h3>👤 My Profile</h3>
+    <label class="flbl">Name</label>
+    <input type="text" id="setName" placeholder="Your name">
+    <label class="flbl">Email</label>
+    <input type="text" id="setEmail" placeholder="Your email">
+    <button class="btn btn-purple" onclick="saveProfile()">💾 Save Profile</button>
+  </div>
+  <div class="panel-box">
+    <h3>🔑 Change Password</h3>
+    <label class="flbl">Current Password</label>
+    <input type="password" id="pwCur" placeholder="Current password">
+    <label class="flbl">New Password</label>
+    <input type="password" id="pwNew" placeholder="New password">
+    <button class="btn btn-purple" onclick="changePw()">🔑 Change Password</button>
+  </div>
+</div>
+
 </main>
 </div>
 
@@ -286,11 +307,12 @@ async function doLogin(){
     if(!r.ok)throw new Error(d.message||'Login failed');
     if(d.user.role!=='admin'){err.textContent='⛔ Sirf admin login kar sakta hai!';return;}
     TOKEN=d.accessToken;localStorage.setItem('rc_admin_token',TOKEN);
+    localStorage.setItem('rc_admin_user',JSON.stringify(d.user));
     document.getElementById('adminBadge').textContent='👑 '+esc(d.user.name);
     enterPanel();
   }catch(e){err.textContent=e.message;}
 }
-function doLogout(){localStorage.removeItem('rc_admin_token');TOKEN='';location.reload();}
+function doLogout(){localStorage.removeItem('rc_admin_token');localStorage.removeItem('rc_admin_user');TOKEN='';location.reload();}
 function enterPanel(){
   document.getElementById('loginWrap').classList.add('hidden');
   document.getElementById('panel').classList.remove('hidden');
@@ -311,6 +333,7 @@ function showSec(id,btn){
   if(id==='slider')loadSlides();
   if(id==='offers')loadOffers();
   if(id==='notify')loadNotifs();
+  if(id==='settings')loadSettings();
 }
 
 /* ---------- DASHBOARD ---------- */
@@ -509,6 +532,38 @@ async function broadcast(){
   try{await api('POST','/api/notifications/broadcast',{title,message});
     document.getElementById('ntTitle').value='';document.getElementById('ntMsg').value='';
     toast('📤','Sab ko bhej diya!');loadNotifs();
+  }catch(e){toast('Error',e.message);}
+}
+
+/* ---------- SETTINGS ---------- */
+function loadSettings(){
+  try{
+    const u=JSON.parse(localStorage.getItem('rc_admin_user')||'{}');
+    document.getElementById('setName').value=u.name||'';
+    document.getElementById('setEmail').value=u.email||'';
+  }catch(e){}
+}
+async function saveProfile(){
+  const name=document.getElementById('setName').value.trim();
+  const email=document.getElementById('setEmail').value.trim();
+  if(!name||!email){toast('⚠️','Name aur email likho!');return;}
+  try{
+    const u=await api('PUT','/api/admin/profile',{name,email});
+    localStorage.setItem('rc_admin_user',JSON.stringify(u));
+    document.getElementById('adminBadge').textContent='👑 '+esc(u.name);
+    toast('✅','Profile update ho gaya!');
+  }catch(e){toast('Error',e.message);}
+}
+async function changePw(){
+  const cur=document.getElementById('pwCur').value;
+  const nw=document.getElementById('pwNew').value;
+  if(!cur||!nw){toast('⚠️','Dono passwords likho!');return;}
+  if(nw.length<6){toast('⚠️','Password kam se kam 6 characters!');return;}
+  try{
+    const u=JSON.parse(localStorage.getItem('rc_admin_user')||'{}');
+    await api('POST','/auth/change-password',{email:u.email,currentPassword:cur,newPassword:nw});
+    document.getElementById('pwCur').value='';document.getElementById('pwNew').value='';
+    toast('✅','Password change ho gaya!');
   }catch(e){toast('Error',e.message);}
 }
 
