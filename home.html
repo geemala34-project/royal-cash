@@ -2802,6 +2802,26 @@ if (bonus.includes("%")) {
 })();
 </script>
 
+<script>
+/* ROYAL CASH — slider images only (does not touch dots/arrows) */
+(function(){
+  var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+  fetch(BACKEND + '/api/slider')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var slides = (Array.isArray(data) ? data : [])
+        .filter(function(s){ return s.isActive && s.imageUrl; })
+        .sort(function(a,b){ return (a.sortOrder||0) - (b.sortOrder||0); });
+      if(!slides.length) return;
+      var arts = document.querySelectorAll('#slidesWrapper .update-slide');
+      arts.forEach(function(art, i){
+        var s = slides[i % slides.length];
+        art.innerHTML = '<img src="' + s.imageUrl.replace(/</g,'&lt;') + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">';
+      });
+    })
+    .catch(function(){});
+})();
+</script>
 
 
 
