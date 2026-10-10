@@ -3168,6 +3168,7 @@ body.subscribe-locked {
   white-space:nowrap !important;
   display:inline-block !important;
   padding:0 10px !important;
+  line-height:38px !important;
 }
 @keyframes topTickSlide{
   0%{transform:translateX(100vw);}
