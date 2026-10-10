@@ -2771,5 +2771,38 @@ if (bonus.includes("%")) {
   }
 }</style>
 
+<script>
+/* ROYAL CASH TICKER — paste right before </body> — works on home.html + mid-page.html */
+(function(){
+  var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+  function setText(el, text, isTop){
+    var safe = String(text).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    if(isTop){
+      el.innerHTML = '<span class="top-ticker-msg">' + safe + '</span><span class="top-ticker-msg">' + safe + '</span>';
+    } else {
+      el.innerHTML = '<span class="ticker-message">' + safe + '</span><span class="ticker-message">' + safe + '</span>';
+    }
+  }
+  function load(position){
+    fetch(BACKEND + '/api/ticker/' + position).then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d || !d.content) return;
+      if(position === 'top'){
+        var el = document.getElementById('topTickerTrack') || document.querySelector('.top-ticker .ticker-track') || document.querySelector('.top-ticker');
+        if(el) setText(el.querySelector('.ticker-track') || el, d.content, true);
+      } else {
+        var el2 = document.getElementById('tickerTrack') || document.querySelector('.ticker-shell .ticker-track');
+        if(el2) setText(el2, d.content, false);
+      }
+    }).catch(function(){});
+  }
+  function init(){ load('top'); load('mid'); }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
+
+  
 </body>
 </html>
