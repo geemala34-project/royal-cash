@@ -739,6 +739,89 @@ if(TOKEN){
 .rc-img-preview .rc-img-remove:hover{background:#f107a3;}
 </style>
 <script>
+
+<style>
+/* Professional image picker */
+.rc-img-picker{
+  border:2px dashed transparent;
+  border-radius:16px;
+  padding:28px 16px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .25s ease;
+  background:linear-gradient(#16121f,#16121f) padding-box,linear-gradient(135deg,#7b2ff7,#f107a3) border-box;
+  margin-bottom:10px;
+  position:relative;
+  overflow:hidden;
+}
+.rc-img-picker::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(168,85,247,.15),transparent 60%);
+  pointer-events:none;
+}
+.rc-img-picker:hover{
+  transform:translateY(-2px) scale(1.01);
+  box-shadow:0 8px 30px rgba(168,85,247,.3);
+}
+.rc-img-picker .rc-picker-icon{
+  font-size:40px;
+  display:block;
+  margin-bottom:10px;
+  filter:drop-shadow(0 0 12px rgba(241,7,163,.5));
+  animation:rcPickerBounce 2s ease-in-out infinite;
+}
+@keyframes rcPickerBounce{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-6px);}
+}
+.rc-img-picker .rc-picker-text{
+  background:linear-gradient(90deg,#c084fc,#f0abfc);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  font-size:15px;
+  font-weight:700;
+}
+.rc-img-picker .rc-picker-sub{
+  color:#6b7280;
+  font-size:12px;
+  margin-top:6px;
+  display:block;
+}
+.rc-img-preview{
+  display:none;
+  position:relative;
+  margin-bottom:10px;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(168,85,247,.4);
+}
+.rc-img-preview.show{display:block;}
+.rc-img-preview img{
+  width:100%;
+  max-height:180px;
+  object-fit:cover;
+  display:block;
+}
+.rc-img-preview .rc-img-remove{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:none;
+  background:rgba(0,0,0,.7);
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  line-height:1;
+}
+.rc-img-preview .rc-img-remove:hover{background:#f107a3;}
+</style>
+<script>
 /* ROYAL CASH — PROFESSIONAL GALLERY PICKER */
 (function(){
   function makePicker(inputId, pickerId, hint){
@@ -780,23 +863,41 @@ if(TOKEN){
     fileIn.addEventListener('change', function(e){
       var file = e.target.files[0];
       if(!file) return;
-      if(file.size > 2*1024*1024){ alert('Image too large! Max 2MB.'); return; }
-      var reader = new FileReader();
-      reader.onload = function(ev){
-        document.getElementById(pickerId + '_data').value = ev.target.result;
-        pvImg.src = ev.target.result;
+      // Auto-resize to perfect size — client ko kuch sochna nahi parega!
+      var img = new Image();
+      var objUrl = URL.createObjectURL(file);
+      img.onload = function(){
+        URL.revokeObjectURL(objUrl);
+        // Slider: 1920x800 | Offer: max 1200px wide
+        var isSlider = pickerId === 'slPick';
+        var targetW = isSlider ? 1920 : 1200;
+        var targetH = isSlider ? 800 : 0;
+        var w = img.width, h = img.height;
+        // Smart crop/resize to exact target
+        var canvas = document.createElement('canvas');
+        if(isSlider){
+          canvas.width = targetW; canvas.height = targetH;
+          // Cover-fit: crop center
+          var scale = Math.max(targetW / w, targetH / h);
+          var sw = targetW / scale, sh = targetH / scale;
+          var sx = (w - sw) / 2, sy = (h - sh) / 2;
+          canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, targetW, targetH);
+        } else {
+          if(w > targetW){ h = Math.round(h * targetW / w); w = targetW; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        }
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        document.getElementById(pickerId + '_data').value = dataUrl;
+        pvImg.src = dataUrl;
         pv.classList.add('show');
         zone.style.display = 'none';
-        // Show dimensions
-        var tmpImg = new Image();
-        tmpImg.onload = function(){
-          dimsEl.style.display = 'block';
-          dimsEl.innerHTML = '📐 Image size: <b>' + tmpImg.width + ' × ' + tmpImg.height + 'px</b>' +
-            (tmpImg.width < 1200 ? ' <span style="color:#f59e0b;">⚠️ Small — may look blurry!</span>' : ' <span style="color:#10b981;">✓ Good!</span>');
-        };
-        tmpImg.src = ev.target.result;
+        dimsEl.style.display = 'block';
+        var kb = Math.round(dataUrl.length * 0.75 / 1024);
+        dimsEl.innerHTML = '✅ Perfect! Auto-resized to <b>' + canvas.width + ' × ' + canvas.height + 'px</b> (' + kb + 'KB)';
       };
-      reader.readAsDataURL(file);
+      img.onerror = function(){ alert('Could not read image.'); };
+      img.src = objUrl;
     });
 
     document.getElementById(pickerId + '_rm').addEventListener('click', function(e){
@@ -830,6 +931,7 @@ if(TOKEN){
   };
 })();
 </script>
+
 
   
 </body>
