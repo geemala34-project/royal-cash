@@ -917,6 +917,105 @@
 })();
 </script>
 
+<style>
+/* ROYAL CASH — Notification Opt-in Modal */
+#rcPushModal{
+  position:fixed;inset:0;z-index:9999;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
+}
+#rcPushModal.show{display:flex;}
+.rc-push-card{
+  background:linear-gradient(135deg,#1a1033,#2d1b4e);
+  border:1px solid rgba(168,85,247,.4);
+  border-radius:20px;padding:36px 32px;text-align:center;
+  max-width:380px;margin:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  animation:rcPushPop .3s ease;
+}
+@keyframes rcPushPop{from{transform:scale(.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+.rc-push-card .rc-push-bell{font-size:52px;margin-bottom:12px;animation:rcPushRing 1.5s ease-in-out infinite;}
+@keyframes rcPushRing{0%,100%{transform:rotate(0);}10%{transform:rotate(15deg);}20%{transform:rotate(-12deg);}30%{transform:rotate(8deg);}40%{transform:rotate(0);}}
+.rc-push-card h3{color:#fff;font-size:20px;margin:0 0 8px;}
+.rc-push-card p{color:#a78bfa;font-size:14px;margin:0 0 20px;line-height:1.5;}
+.rc-push-btns{display:flex;gap:10px;justify-content:center;}
+.rc-push-allow{
+  background:linear-gradient(135deg,#7b2ff7,#f107a3);
+  color:#fff;border:none;border-radius:12px;
+  padding:12px 28px;font-size:15px;font-weight:700;cursor:pointer;
+}
+.rc-push-allow:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(241,7,163,.4);}
+.rc-push-later{
+  background:transparent;color:#6b7280;border:1px solid #374151;
+  border-radius:12px;padding:12px 20px;font-size:14px;cursor:pointer;
+}
+</style>
+<div id="rcPushModal">
+  <div class="rc-push-card">
+    <div class="rc-push-bell">🔔</div>
+    <h3>Stay Updated!</h3>
+    <p>Enable notifications to get instant updates on offers, bonuses & important news!</p>
+    <div class="rc-push-btns">
+      <button class="rc-push-allow" id="rcPushAllow">Enable</button>
+      <button class="rc-push-later" id="rcPushLater">Later</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ROYAL CASH — Push Subscribe (professional signup flow) */
+(function(){
+  var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+  var VAPID_PUBLIC = 'BI5YzD7VTC4cfROJbJbqMjxnUZ27QTuGOf0PLj9pz2KkTo7DELgS_wVUczrrNOSxTTAofG4f39_VW4ey_WllpSY';
+
+  function urlBase64ToUint8Array(base64String) {
+    var padding = '='.repeat((4 - base64String.length % 4) % 4);
+    var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    var rawData = window.atob(base64);
+    var outputArray = new Uint8Array(rawData.length);
+    for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  }
+
+  async function doSubscribe(){
+    try {
+      var reg = await navigator.serviceWorker.register('/sw.js');
+      var sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC)
+      });
+      var user = JSON.parse(localStorage.getItem('user') || '{}');
+      await fetch(BACKEND + '/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON(), userId: user.id })
+      });
+      localStorage.setItem('rc_push_done', '1');
+    } catch(e){ console.log('Push failed:', e); }
+    document.getElementById('rcPushModal').classList.remove('show');
+  }
+
+  // Call this AFTER successful login/signup!
+  window.rcAskPush = function(){
+    if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if(localStorage.getItem('rc_push_done')) return;
+    if(Notification.permission === 'granted'){ doSubscribe(); return; }
+    if(Notification.permission === 'denied') return;
+    document.getElementById('rcPushModal').classList.add('show');
+  };
+
+  document.getElementById('rcPushAllow').addEventListener('click', async function(){
+    var perm = await Notification.requestPermission();
+    if(perm === 'granted') doSubscribe();
+    else document.getElementById('rcPushModal').classList.remove('show');
+  });
+  document.getElementById('rcPushLater').addEventListener('click', function(){
+    document.getElementById('rcPushModal').classList.remove('show');
+  });
+})();
+</script>
+
+
+
     
 </body>
 </html>
