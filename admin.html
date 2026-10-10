@@ -460,8 +460,9 @@ async function broadcast(){
   if(!title||!message){toast('Required','Enter a title and message.',false);return;}
   if(!confirm('Send to all users?'))return;
   try{await api('POST','/api/notifications/broadcast',{title,message});
+    try{await api('POST','/api/push/send',{title:title,body:message});}catch(pe){}
     document.getElementById('ntTitle').value='';document.getElementById('ntMsg').value='';
-    toast('Sent','Broadcast delivered.',true);loadNotifs();
+    toast('Sent','Broadcast + push delivered.',true);loadNotifs();
   }catch(e){toast('Error',e.message,false);}
 }
 function loadSettings(){
@@ -496,250 +497,6 @@ if(TOKEN){
   }).catch(()=>{localStorage.removeItem('rc_admin_token');localStorage.removeItem('rc_admin_user');TOKEN='';});
 }
 </script>
-<style>
-/* Professional image picker */
-.rc-img-picker{
-  border:2px dashed transparent;
-  border-radius:16px;
-  padding:28px 16px;
-  text-align:center;
-  cursor:pointer;
-  transition:all .25s ease;
-  background:linear-gradient(#16121f,#16121f) padding-box,linear-gradient(135deg,#7b2ff7,#f107a3) border-box;
-  margin-bottom:10px;
-  position:relative;
-  overflow:hidden;
-}
-.rc-img-picker::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at 50% 0%,rgba(168,85,247,.15),transparent 60%);
-  pointer-events:none;
-}
-.rc-img-picker:hover{
-  transform:translateY(-2px) scale(1.01);
-  box-shadow:0 8px 30px rgba(168,85,247,.3);
-}
-.rc-img-picker .rc-picker-icon{
-  font-size:40px;
-  display:block;
-  margin-bottom:10px;
-  filter:drop-shadow(0 0 12px rgba(241,7,163,.5));
-  animation:rcPickerBounce 2s ease-in-out infinite;
-}
-@keyframes rcPickerBounce{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-6px);}
-}
-.rc-img-picker .rc-picker-text{
-  background:linear-gradient(90deg,#c084fc,#f0abfc);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  font-size:15px;
-  font-weight:700;
-}
-.rc-img-picker .rc-picker-sub{
-  color:#6b7280;
-  font-size:12px;
-  margin-top:6px;
-  display:block;
-}
-.rc-img-preview{
-  display:none;
-  position:relative;
-  margin-bottom:10px;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid rgba(168,85,247,.4);
-}
-.rc-img-preview.show{display:block;}
-.rc-img-preview img{
-  width:100%;
-  max-height:180px;
-  object-fit:cover;
-  display:block;
-}
-.rc-img-preview .rc-img-remove{
-  position:absolute;
-  top:8px;
-  right:8px;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  border:none;
-  background:rgba(0,0,0,.7);
-  color:#fff;
-  font-size:16px;
-  cursor:pointer;
-  line-height:1;
-}
-.rc-img-preview .rc-img-remove:hover{background:#f107a3;}
-</style>
-  
-<script>
-/* ROYAL CASH — PROFESSIONAL GALLERY PICKER */
-(function(){
-  function makePicker(inputId, pickerId){
-    var input = document.getElementById(inputId);
-    if(!input || document.getElementById(pickerId + '_zone')) return;
-    input.style.display = 'none';
-    // hide the old label too
-    var label = input.previousElementSibling;
-    if(label && label.tagName === 'LABEL') label.style.display = 'none';
-
-    var wrap = document.createElement('div');
-    wrap.innerHTML =
-      '<label class="fl">Select image</label>' +
-      '<div class="rc-img-picker" id="' + pickerId + '_zone">' +
-        '<span class="rc-picker-icon">✨🖼️✨</span>' +
-        '<span class="rc-picker-text">Click to choose image</span>' +
-        '<span class="rc-picker-sub">PNG, JPG up to 2MB</span>' +
-      '</div>' +
-      '<div class="rc-img-preview" id="' + pickerId + '_pv">' +
-        '<img id="' + pickerId + '_img">' +
-        '<button type="button" class="rc-img-remove" id="' + pickerId + '_rm">×</button>' +
-      '</div>' +
-      '<input type="file" id="' + pickerId + '_file" accept="image/*" style="display:none">' +
-      '<input type="hidden" id="' + pickerId + '_data">';
-    input.parentNode.insertBefore(wrap, input.nextSibling);
-
-    var zone = document.getElementById(pickerId + '_zone');
-    var fileIn = document.getElementById(pickerId + '_file');
-    var pv = document.getElementById(pickerId + '_pv');
-    var pvImg = document.getElementById(pickerId + '_img');
-
-    zone.addEventListener('click', function(){ fileIn.click(); });
-
-    fileIn.addEventListener('change', function(e){
-      var file = e.target.files[0];
-      if(!file) return;
-      if(file.size > 2*1024*1024){ alert('Image too large! Max 2MB.'); return; }
-      var reader = new FileReader();
-      reader.onload = function(ev){
-        document.getElementById(pickerId + '_data').value = ev.target.result;
-        pvImg.src = ev.target.result;
-        pv.classList.add('show');
-        zone.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    });
-
-    document.getElementById(pickerId + '_rm').addEventListener('click', function(e){
-      e.stopPropagation();
-      document.getElementById(pickerId + '_data').value = '';
-      fileIn.value = '';
-      pv.classList.remove('show');
-      zone.style.display = 'block';
-    });
-  }
-
-  function init(){
-    makePicker('slImg', 'slPick');
-    makePicker('ofImg', 'ofPick');
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-
-  var origAddSlide = window.addSlide;
-  window.addSlide = async function(){
-    var d = document.getElementById('slPick_data');
-    if(d && d.value) document.getElementById('slImg').value = d.value;
-    return origAddSlide();
-  };
-  var origAddOffer = window.addOffer;
-  window.addOffer = async function(){
-    var d = document.getElementById('ofPick_data');
-    if(d && d.value) document.getElementById('ofImg').value = d.value;
-    return origAddOffer();
-  };
-})();
-</script>
-
-<style>
-/* Professional image picker */
-.rc-img-picker{
-  border:2px dashed transparent;
-  border-radius:16px;
-  padding:28px 16px;
-  text-align:center;
-  cursor:pointer;
-  transition:all .25s ease;
-  background:linear-gradient(#16121f,#16121f) padding-box,linear-gradient(135deg,#7b2ff7,#f107a3) border-box;
-  margin-bottom:10px;
-  position:relative;
-  overflow:hidden;
-}
-.rc-img-picker::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at 50% 0%,rgba(168,85,247,.15),transparent 60%);
-  pointer-events:none;
-}
-.rc-img-picker:hover{
-  transform:translateY(-2px) scale(1.01);
-  box-shadow:0 8px 30px rgba(168,85,247,.3);
-}
-.rc-img-picker .rc-picker-icon{
-  font-size:40px;
-  display:block;
-  margin-bottom:10px;
-  filter:drop-shadow(0 0 12px rgba(241,7,163,.5));
-  animation:rcPickerBounce 2s ease-in-out infinite;
-}
-@keyframes rcPickerBounce{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-6px);}
-}
-.rc-img-picker .rc-picker-text{
-  background:linear-gradient(90deg,#c084fc,#f0abfc);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  font-size:15px;
-  font-weight:700;
-}
-.rc-img-picker .rc-picker-sub{
-  color:#6b7280;
-  font-size:12px;
-  margin-top:6px;
-  display:block;
-}
-.rc-img-preview{
-  display:none;
-  position:relative;
-  margin-bottom:10px;
-  border-radius:14px;
-  overflow:hidden;
-  border:1px solid rgba(168,85,247,.4);
-}
-.rc-img-preview.show{display:block;}
-.rc-img-preview img{
-  width:100%;
-  max-height:180px;
-  object-fit:cover;
-  display:block;
-}
-.rc-img-preview .rc-img-remove{
-  position:absolute;
-  top:8px;
-  right:8px;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  border:none;
-  background:rgba(0,0,0,.7);
-  color:#fff;
-  font-size:16px;
-  cursor:pointer;
-  line-height:1;
-}
-.rc-img-preview .rc-img-remove:hover{background:#f107a3;}
-</style>
-<script>
-
 <style>
 /* Professional image picker */
 .rc-img-picker{
@@ -912,7 +669,7 @@ if(TOKEN){
 
   function init(){
     makePicker('slImg', 'slPick', 'Recommended: <b>1920 × 800px</b> (wide banner). Keep important content in the center — sides may crop on mobile.');
-    makePicker('ofImg', 'ofPick', 'Recommended: <b>800 × 800px</b> (square) or <b>1200 × 628px</b> (wide). Max 2MB.');
+    makePicker('ofImg', 'ofPick', 'Recommended: <b>800 × 800px</b> (square) or <b>1200 × 628px</b> (wide).');
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
@@ -932,8 +689,5 @@ if(TOKEN){
 })();
 </script>
 
-
-
-  
 </body>
 </html>
