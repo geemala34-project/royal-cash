@@ -2900,7 +2900,20 @@ if (bonus.includes("%")) {
     document.getElementById('rcPushModal').classList.remove('show');
   }
 
-  // Call this AFTER successful login/signup!
+  // Auto-detect login — jab user login kare, popup dikhao!
+  setInterval(function(){
+    try {
+      var user = JSON.parse(localStorage.getItem('user') || '{}');
+      if(user.id && !localStorage.getItem('rc_push_done') && !localStorage.getItem('rc_push_asked')) {
+        localStorage.setItem('rc_push_asked', '1');
+        window.rcAskPush();
+      }
+      // Logout par reset (dobara login par phir poochega)
+      if(!user.id) localStorage.removeItem('rc_push_asked');
+    } catch(e){}
+  }, 3000);
+
+  // Call this AFTER successful login/signup! (optional — auto-detect bhi hai)
   window.rcAskPush = function(){
     if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
     if(localStorage.getItem('rc_push_done')) return;
