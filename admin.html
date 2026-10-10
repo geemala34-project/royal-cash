@@ -496,5 +496,66 @@ if(TOKEN){
   }).catch(()=>{localStorage.removeItem('rc_admin_token');localStorage.removeItem('rc_admin_user');TOKEN='';});
 }
 </script>
+<script>
+/* ROYAL CASH — GALLERY PICKER (replaces URL inputs, no backend change needed) */
+(function(){
+  function makePicker(inputId, previewId){
+    var input = document.getElementById(inputId);
+    if(!input) return;
+    // Hide URL input, add file picker + preview
+    var wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<label class="fl">Select image</label>' +
+      '<input type="file" id="' + previewId + '_file" accept="image/*" style="margin-bottom:10px">' +
+      '<img id="' + previewId + '" style="display:none;max-width:200px;max-height:120px;border-radius:10px;border:1px solid rgba(168,85,247,.4);margin-bottom:10px">' +
+      '<input type="hidden" id="' + previewId + '_data">';
+    input.style.display = 'none';
+    input.parentNode.insertBefore(wrap, input.nextSibling);
+
+    document.getElementById(previewId + '_file').addEventListener('change', function(e){
+      var file = e.target.files[0];
+      if(!file) return;
+      if(file.size > 2*1024*1024){ alert('Image too large! Max 2MB.'); return; }
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        document.getElementById(previewId + '_data').value = ev.target.result;
+        var pv = document.getElementById(previewId);
+        pv.src = ev.target.result;
+        pv.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function init(){
+    makePicker('slImg', 'slPreview');   // slider
+    makePicker('ofImg', 'ofPreview');   // offer
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  // Override addSlide to use picked image
+  var origAddSlide = window.addSlide;
+  window.addSlide = async function(){
+    var data = document.getElementById('slPreview_data');
+    if(data && data.value){
+      document.getElementById('slImg').value = data.value;
+    }
+    return origAddSlide();
+  };
+
+  // Override addOffer to use picked image
+  var origAddOffer = window.addOffer;
+  window.addOffer = async function(){
+    var data = document.getElementById('ofPreview_data');
+    if(data && data.value){
+      document.getElementById('ofImg').value = data.value;
+    }
+    return origAddOffer();
+  };
+})();
+</script>
+
+  
 </body>
 </html>
