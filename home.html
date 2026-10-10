@@ -2802,6 +2802,185 @@ if (bonus.includes("%")) {
 })();
 </script>
 
+<style>
+/* ROYAL CASH — HERO SLIDER */
+#rcSlider{
+  display:none;
+  position:relative;
+  width:100%;
+  max-width:1200px;
+  margin:24px auto;
+  padding:0 4%;
+  box-sizing:border-box;
+}
+#rcSlider.rc-slider-show{display:block;}
+.rc-slider-track{
+  position:relative;
+  width:100%;
+  aspect-ratio:21/8;
+  min-height:180px;
+  border-radius:20px;
+  overflow:hidden;
+  border:1px solid rgba(168,85,247,.35);
+  box-shadow:0 12px 40px rgba(123,47,247,.25);
+}
+.rc-slide{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity .8s ease;
+  pointer-events:none;
+}
+.rc-slide.rc-active{
+  opacity:1;
+  pointer-events:auto;
+}
+.rc-slide img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.rc-slide-title{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:20px 24px;
+  background:linear-gradient(transparent,rgba(0,0,0,.8));
+  color:#fff;
+  font-size:20px;
+  font-weight:800;
+}
+.rc-slider-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid rgba(168,85,247,.5);
+  background:rgba(6,5,17,.7);
+  backdrop-filter:blur(8px);
+  color:#fff;
+  font-size:20px;
+  cursor:pointer;
+  z-index:5;
+  transition:all .2s ease;
+}
+.rc-slider-arrow:hover{
+  background:rgba(123,47,247,.8);
+  box-shadow:0 0 20px rgba(168,85,247,.5);
+}
+.rc-slider-prev{left:calc(4% + 12px);}
+.rc-slider-next{right:calc(4% + 12px);}
+.rc-slider-dots{
+  position:absolute;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:8px;
+  z-index:5;
+}
+.rc-slider-dots button{
+  width:8px;
+  height:8px;
+  border-radius:20px;
+  border:none;
+  background:rgba(255,255,255,.35);
+  cursor:pointer;
+  padding:0;
+  transition:all .3s ease;
+}
+.rc-slider-dots button.rc-dot-active{
+  width:28px;
+  background:linear-gradient(90deg,#7b2ff7,#f107a3);
+  box-shadow:0 0 12px rgba(241,7,163,.6);
+}
+@media (max-width:760px){
+  .rc-slider-track{aspect-ratio:16/9;min-height:150px;}
+  .rc-slide-title{font-size:16px;padding:14px 16px;}
+  .rc-slider-arrow{width:36px;height:36px;font-size:16px;}
+}
+</style>
+<div id="rcSlider" aria-hidden="true">
+  <div class="rc-slider-track" id="rcSliderTrack"></div>
+  <button class="rc-slider-arrow rc-slider-prev" id="rcSliderPrev" aria-label="Previous">‹</button>
+  <button class="rc-slider-arrow rc-slider-next" id="rcSliderNext" aria-label="Next">›</button>
+  <div class="rc-slider-dots" id="rcSliderDots"></div>
+</div>
+<script>
+/* ROYAL CASH SLIDER — auto-sliding banner from admin */
+(function(){
+  var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+  var slider = document.getElementById('rcSlider');
+  var track = document.getElementById('rcSliderTrack');
+  var dotsWrap = document.getElementById('rcSliderDots');
+  if(!slider || !track) return;
+
+  // Insert after hero section (or after navbar if no hero)
+  var hero = document.querySelector('.hero') || document.querySelector('.navbar');
+  if(hero && hero.parentNode){
+    hero.parentNode.insertBefore(slider, hero.nextSibling);
+  }
+
+  var slides = [], idx = 0, timer = null;
+
+  function esc(s){ return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function render(){
+    track.innerHTML = '';
+    dotsWrap.innerHTML = '';
+    slides.forEach(function(s, i){
+      var div = document.createElement('div');
+      div.className = 'rc-slide' + (i === 0 ? ' rc-active' : '');
+      div.innerHTML = '<img src="' + esc(s.imageUrl) + '" alt="' + esc(s.title || 'Slide') + '" loading="lazy">' +
+        (s.title ? '<div class="rc-slide-title">' + esc(s.title) + '</div>' : '');
+      track.appendChild(div);
+
+      var dot = document.createElement('button');
+      dot.setAttribute('aria-label', 'Go to slide ' + (i+1));
+      if(i === 0) dot.classList.add('rc-dot-active');
+      dot.addEventListener('click', function(){ goTo(i); restart(); });
+      dotsWrap.appendChild(dot);
+    });
+  }
+
+  function goTo(i){
+    idx = (i + slides.length) % slides.length;
+    var els = track.querySelectorAll('.rc-slide');
+    var dots = dotsWrap.querySelectorAll('button');
+    els.forEach(function(el, j){ el.classList.toggle('rc-active', j === idx); });
+    dots.forEach(function(d, j){ d.classList.toggle('rc-dot-active', j === idx); });
+  }
+
+  function next(){ goTo(idx + 1); }
+  function prev(){ goTo(idx - 1); }
+  function restart(){
+    if(timer) clearInterval(timer);
+    if(slides.length > 1) timer = setInterval(next, 5000);
+  }
+
+  document.getElementById('rcSliderPrev').addEventListener('click', function(){ prev(); restart(); });
+  document.getElementById('rcSliderNext').addEventListener('click', function(){ next(); restart(); });
+
+  // Pause on hover
+  slider.addEventListener('mouseenter', function(){ if(timer) clearInterval(timer); });
+  slider.addEventListener('mouseleave', restart);
+
+  fetch(BACKEND + '/api/slider').then(function(r){ return r.json(); })
+  .then(function(data){
+    slides = (Array.isArray(data) ? data : []).filter(function(s){ return s.isActive && s.imageUrl; });
+    slides.sort(function(a, b){ return (a.sortOrder || 0) - (b.sortOrder || 0); });
+    if(slides.length === 0) return;
+    render();
+    slider.classList.add('rc-slider-show');
+    slider.setAttribute('aria-hidden', 'false');
+    restart();
+  }).catch(function(){});
+})();
+</script>
 
   
 </body>
