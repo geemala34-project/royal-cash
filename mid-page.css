@@ -3142,3 +3142,37 @@ body.subscribe-locked {
   .rc-otp-digit{width:36px;height:46px;font-size:18px}
   .rc-otp-digits{gap:5px}
 }
+
+/* TOP TICKER — single text slides alone across full width (like mid ticker) */
+.top-ticker{
+  width:100% !important;
+  overflow:hidden !important;
+  background:#060610 !important;
+  border-bottom:1px solid rgba(173,69,255,.25) !important;
+  height:38px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:relative !important;
+}
+.top-ticker .ticker-track{
+  display:inline-block !important;
+  white-space:nowrap !important;
+  animation:topTickSlide 14s linear infinite !important;
+  will-change:transform !important;
+}
+.top-ticker-msg{
+  color:#e9d5ff !important;
+  font-size:13px !important;
+  font-weight:600 !important;
+  letter-spacing:.3px !important;
+  white-space:nowrap !important;
+  display:inline-block !important;
+  padding:0 10px !important;
+}
+@keyframes topTickSlide{
+  0%{transform:translateX(100vw);}
+  100%{transform:translateX(-100%);}
+}
+@media (max-width:760px){
+  .top-ticker{height:44px !important;}
+}
