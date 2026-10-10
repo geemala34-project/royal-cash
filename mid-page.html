@@ -759,9 +759,15 @@
   function setText(el, text, isTop){
     var safe = String(text).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     if(isTop){
-      el.innerHTML = '<span class="top-ticker-msg">' + safe + '</span><span class="top-ticker-msg">' + safe + '</span>';
+      /* TOP: single text — slides alone across full width (like mid ticker) */
+      el.innerHTML = '<span class="top-ticker-msg">' + safe + '</span>';
     } else {
-      el.innerHTML = '<span class="ticker-message">' + safe + '</span><span class="ticker-message">' + safe + '</span>';
+      /* MID: keep as-is (working perfectly — don't touch!) */
+      var html = '';
+      for(var i = 0; i < 6; i++){
+        html += '<span class="ticker-message">' + safe + '</span>';
+      }
+      el.innerHTML = html;
     }
   }
   function load(position){
@@ -782,6 +788,7 @@
   else init();
 })();
 </script>
+
 
     
 </body>
