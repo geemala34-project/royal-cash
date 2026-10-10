@@ -789,6 +789,133 @@
 })();
 </script>
 
+<style>
+/* ROYAL CASH — OFFER BANNER (right side, floating) */
+#rcOfferBanner{
+  position:fixed;
+  right:24px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:9000;
+  width:280px;
+  max-width:calc(100vw - 48px);
+  display:none;
+  animation:rcOfferFloat 3s ease-in-out infinite;
+}
+#rcOfferBanner.rc-offer-show{display:block;}
+@keyframes rcOfferFloat{
+  0%,100%{margin-top:0;}
+  50%{margin-top:-14px;}
+}
+.rc-offer-card{
+  position:relative;
+  border-radius:20px;
+  overflow:hidden;
+  background:linear-gradient(145deg,#1a0b2e,#2d1155);
+  border:1px solid rgba(168,85,247,.5);
+  box-shadow:0 20px 60px rgba(123,47,247,.4),0 0 30px rgba(241,7,163,.2);
+}
+.rc-offer-card img{
+  width:100%;
+  display:block;
+  border-radius:20px;
+}
+.rc-offer-text{
+  padding:24px 20px;
+  text-align:center;
+  color:#fff;
+}
+.rc-offer-badge{
+  display:inline-block;
+  padding:6px 16px;
+  border-radius:20px;
+  background:linear-gradient(90deg,#7b2ff7,#f107a3);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:2px;
+  margin-bottom:12px;
+  text-transform:uppercase;
+}
+.rc-offer-text p{
+  margin:0;
+  font-size:16px;
+  line-height:1.5;
+  color:#e9d5ff;
+}
+.rc-offer-close{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  border:none;
+  background:rgba(0,0,0,.6);
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+  z-index:2;
+  line-height:1;
+}
+.rc-offer-close:hover{background:rgba(241,7,163,.8);}
+@media (max-width:760px){
+  #rcOfferBanner{
+    right:12px;
+    width:220px;
+  }
+}
+</style>
+<div id="rcOfferBanner" aria-hidden="true">
+  <div class="rc-offer-card">
+    <button class="rc-offer-close" id="rcOfferClose" aria-label="Close">×</button>
+    <div id="rcOfferContent"></div>
+  </div>
+</div>
+<script>
+/* ROYAL CASH OFFER BANNER — shows when offer published, hides when removed */
+(function(){
+  var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+  var banner = document.getElementById('rcOfferBanner');
+  var content = document.getElementById('rcOfferContent');
+  if(!banner || !content) return;
+
+  document.getElementById('rcOfferClose').addEventListener('click', function(){
+    banner.classList.remove('rc-offer-show');
+    banner.setAttribute('aria-hidden','true');
+  });
+
+  function esc(s){ return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function checkOffer(){
+    fetch(BACKEND + '/api/offer').then(function(r){ return r.json(); })
+    .then(function(data){
+      var offers = Array.isArray(data) ? data : (data ? [data] : []);
+      var live = offers.find(function(o){ return o.isActive; });
+      if(live && (live.content || live.imageUrl)){
+        var html = '<div class="rc-offer-badge">🎁 Special Offer</div>';
+        if(live.imageUrl){
+          html = '<img src="' + esc(live.imageUrl) + '" alt="Offer">';
+        } else {
+          html += '<div class="rc-offer-text" style="padding-top:0"><p>' + esc(live.content) + '</p></div>';
+          content.innerHTML = html;
+          // wrap text case
+          content.innerHTML = '<div class="rc-offer-text">' + html + '</div>';
+        }
+        if(live.imageUrl){
+          content.innerHTML = html;
+        }
+        banner.classList.add('rc-offer-show');
+        banner.setAttribute('aria-hidden','false');
+      } else {
+        banner.classList.remove('rc-offer-show');
+        banner.setAttribute('aria-hidden','true');
+      }
+    }).catch(function(){});
+  }
+  checkOffer();
+  setInterval(checkOffer, 30000);
+})();
+</script>
 
     
 </body>
