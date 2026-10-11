@@ -2933,6 +2933,97 @@ if (bonus.includes("%")) {
 })();
 </script>
 
+<!-- ROYAL CASH — Push v2 (mobile fix) — STEP 1 of 1 -->
+<!-- Paste at the very END of home.html, BEFORE </body>. Only once. -->
+<!-- If old push code exists, leave it — this overrides it. -->
+<style>
+#rcBell{position:fixed;right:16px;bottom:16px;z-index:99999;width:52px;height:52px;border-radius:50%;border:none;background:linear-gradient(135deg,#7b2ff7,#f107a3);font-size:24px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;}
+#rcBellDot{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid #fff;}
+#rcBell.on #rcBellDot{background:#22c55e;}
+#rcPushPanel{position:fixed;right:16px;bottom:80px;z-index:99999;width:300px;background:linear-gradient(135deg,#1a1033,#2d1b4e);border:1px solid rgba(168,85,247,.4);border-radius:16px;padding:20px;display:none;color:#fff;}
+#rcPushPanel.show{display:block;}
+#rcPushPanel h4{margin:0 0 6px;font-size:16px;color:#fff;}
+#rcPushPanel p{margin:0 0 12px;font-size:13px;color:#c4b5fd;line-height:1.5;}
+#rcPushPanel .row{display:flex;gap:8px;}
+.rcbtn{flex:1;border:none;border-radius:10px;padding:10px;font-size:14px;font-weight:700;cursor:pointer;}
+#rcPushEnable{background:linear-gradient(135deg,#7b2ff7,#f107a3);color:#fff;}
+#rcPushTest{background:#374151;color:#fff;}
+#rcPushMsg{font-size:12px;margin-top:10px;color:#fbbf24;min-height:16px;line-height:1.4;}
+</style>
+<button id="rcBell" aria-label="Notifications">🔔<span id="rcBellDot"></span></button>
+<div id="rcPushPanel">
+  <h4>🔔 Notifications</h4>
+  <p id="rcPushStatus">Checking...</p>
+  <div class="row">
+    <button class="rcbtn" id="rcPushEnable">Enable</button>
+    <button class="rcbtn" id="rcPushTest">Test</button>
+  </div>
+  <div id="rcPushMsg"></div>
+</div>
+<script>
+(function(){
+if(window.__rcPush2) return; window.__rcPush2 = 1;
+window.rcAskPush = function(){}; /* v1 neutralized — v2 handles push now */
+var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+var VAPID = 'BI5YzD7VTC4cfROJbJbqMjxnUZ27QTuGOf0PLj9pz2KkTo7DELgS_wVUczrrNOSxTTAofG4f39_VW4ey_WllpSY';
+var oldModal = document.getElementById('rcPushModal'); if(oldModal) oldModal.remove();
+function msg(t){ document.getElementById('rcPushMsg').textContent = t; }
+function b64(s){ var p='='.repeat((4-s.length%4)%4); var b=(s+p).replace(/-/g,'+').replace(/_/g,'/'); var r=atob(b); var o=new Uint8Array(r.length); for(var i=0;i<r.length;i++) o[i]=r.charCodeAt(i); return o; }
+function supported(){ return ('serviceWorker' in navigator) && ('PushManager' in window); }
+async function refresh(){
+  var st = document.getElementById('rcPushStatus'), bell = document.getElementById('rcBell');
+  if(!supported()){ st.textContent = "This browser doesn't support notifications. Open this site in Chrome (not inside the WhatsApp/Facebook browser)."; bell.classList.remove('on'); return; }
+  if(Notification.permission === 'denied'){ st.textContent = 'Blocked. In Chrome: tap ⋮ → Settings → Site settings → Notifications → Allow.'; bell.classList.remove('on'); return; }
+  try{
+    var reg = await navigator.serviceWorker.getRegistration();
+    var sub = reg ? await reg.pushManager.getSubscription() : null;
+    if(sub && localStorage.getItem('rc_push_done')){ st.textContent = 'ON ✅ — you will get every update.'; bell.classList.add('on'); }
+    else { st.textContent = 'OFF. Tap Enable.'; bell.classList.remove('on'); }
+  }catch(e){ st.textContent = 'OFF. Tap Enable.'; bell.classList.remove('on'); }
+}
+async function enable(){
+  msg('');
+  if(!supported()){ msg('Open in Chrome browser, then try again.'); return; }
+  try{
+    var perm = await Notification.requestPermission();
+    if(perm !== 'granted'){ msg('Permission not granted. Tap Allow.'); refresh(); return; }
+    msg('Subscribing...');
+    var reg = await navigator.serviceWorker.register('/sw.js');
+    var sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(VAPID) });
+    var user = JSON.parse(localStorage.getItem('user') || '{}');
+    var res = await fetch(BACKEND + '/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON(), userId: user.id || null }) });
+    if(!res.ok) throw new Error('Server error ' + res.status);
+    localStorage.setItem('rc_push_done', '1');
+    msg('Done! ✅');
+    reg.showNotification('Royal Cash ✅', { body: "Notifications ON! You will now get every offer and update.", icon: '/royal-cash-logo.png', badge: '/royal-cash-logo.png', vibrate: [200, 100, 200] });
+  }catch(e){ msg('Error: ' + e.message); }
+  refresh();
+}
+async function test(){
+  msg('');
+  try{
+    var reg = await navigator.serviceWorker.getRegistration();
+    if(!reg){ msg('Tap Enable first.'); return; }
+    reg.showNotification('Royal Cash 🔔', { body: 'Test successful! If you can see this, notifications work on this phone.', icon: '/royal-cash-logo.png', badge: '/royal-cash-logo.png' });
+    msg('Test sent — check your notifications.');
+  }catch(e){ msg('Tap Enable first.'); }
+}
+document.getElementById('rcBell').onclick = function(){ document.getElementById('rcPushPanel').classList.toggle('show'); refresh(); };
+document.getElementById('rcPushEnable').onclick = enable;
+document.getElementById('rcPushTest').onclick = test;
+setInterval(function(){
+  try{
+    var user = JSON.parse(localStorage.getItem('user') || '{}');
+    if(user.id && !localStorage.getItem('rc_push_done') && !localStorage.getItem('rc_push_asked2')){
+      localStorage.setItem('rc_push_asked2', '1');
+      document.getElementById('rcPushPanel').classList.add('show'); refresh();
+    }
+    if(!user.id) localStorage.removeItem('rc_push_asked2');
+  }catch(e){}
+}, 4000);
+refresh();
+})();
+</script>
 
   
 </body>
