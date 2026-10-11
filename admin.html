@@ -460,9 +460,10 @@ async function broadcast(){
   if(!title||!message){toast('Required','Enter a title and message.',false);return;}
   if(!confirm('Send to all users?'))return;
   try{await api('POST','/api/notifications/broadcast',{title,message});
-    try{await api('POST','/api/push/send',{title:title,body:message});}catch(pe){}
+    try{const pr=await api('POST','/api/push/send',{title:title,body:message});
+      toast('Push','Sent to '+pr.sent+'/'+pr.total+' devices.',pr.sent>0);}catch(pe){toast('Push failed','Check backend.',false);}
     document.getElementById('ntTitle').value='';document.getElementById('ntMsg').value='';
-    toast('Sent','Broadcast + push delivered.',true);loadNotifs();
+    toast('Sent','Broadcast delivered.',true);loadNotifs();
   }catch(e){toast('Error',e.message,false);}
 }
 function loadSettings(){
