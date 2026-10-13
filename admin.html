@@ -148,6 +148,7 @@ label.fl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing
     <button class="nav-btn" onclick="showSec('ticker',this)"><svg class="ic" viewBox="0 0 24 24"><path d="M3 11l18-7-7 18-2.5-7.5z"/></svg><span class="tx">Tickers</span></button>
     <button class="nav-btn" onclick="showSec('slider',this)"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span class="tx">Slider</span></button>
     <button class="nav-btn" onclick="showSec('offers',this)"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v9h14v-9"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg><span class="tx">Offers</span></button>
+    <button class="nav-btn" onclick="showSec('games',this)"><svg class="ic" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v4M5 13h4"/><circle cx="16" cy="11.5" r="1" fill="currentColor"/><circle cx="18.2" cy="14" r="1" fill="currentColor"/></svg><span class="tx">Games</span></button>
     <div class="nav-sec">System</div>
     <button class="nav-btn" onclick="showSec('payments',this)"><svg class="ic" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg><span class="tx">Payment Methods</span></button>
     <button class="nav-btn" onclick="showSec('notify',this)"><svg class="ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="tx">Notifications</span></button>
@@ -188,6 +189,27 @@ label.fl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing
     <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Details</th><th>Status</th><th></th></tr></thead><tbody id="pmTable"></tbody></table></div>
   </div>
 </div>
+
+<div class="sec" id="sec-games">
+  <div class="box"><div class="box-h"><h3 id="gmFormTitle">Add game</h3></div><div class="box-b">
+    <input type="hidden" id="gmEditId" value="">
+    <div class="frow"><div><label class="fl">Game name</label><input type="text" id="gmName" placeholder="e.g. Lucky Slots"></div>
+    <div><label class="fl">Section</label><select id="gmCat"><option value="most_played">Most Played</option><option value="winning_zone">Winning Zone</option><option value="mega_wins">Mega Wins</option></select></div></div>
+    <label class="fl">Game link (URL)</label><input type="url" id="gmLink" placeholder="https://…">
+    <div class="frow"><div><label class="fl">Bonus badge text</label><input type="text" id="gmBonus" placeholder="e.g. 100% or Free Spins (empty = no badge)"></div>
+    <div><label class="fl">Status</label><select id="gmActive"><option value="true">Active</option><option value="false">Disabled</option></select></div></div>
+    <label class="fl">Game image</label><input type="text" id="gmImg" style="display:none">
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-p" id="gmSaveBtn" onclick="saveGame()">Add game</button>
+      <button class="btn btn-d" id="gmCancelBtn" onclick="resetGameForm()" style="display:none">Cancel</button>
+    </div>
+  </div></div>
+  <div class="box"><div class="box-h"><h3>Games</h3><button class="btn btn-d btn-sm" onclick="loadGames()">Refresh</button></div>
+    <div style="overflow-x:auto"><table><thead><tr><th></th><th>Name</th><th>Section</th><th>Bonus</th><th>Status</th><th></th></tr></thead><tbody id="gmTable"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ============================================================
 
 <div class="sec" id="sec-ticker">
   <div class="box"><div class="box-h"><h3>Top ticker <span class="badge b-ok">live scroll</span></h3></div><div class="box-b">
@@ -687,6 +709,141 @@ if(TOKEN){
     if(d && d.value) document.getElementById('ofImg').value = d.value;
     return origAddOffer();
   };
+})();
+</script>
+
+<script>
+/* ROYAL CASH — Admin Games management */
+(function(){
+  var _showSec = window.showSec;
+  window.showSec = function(id, btn){ _showSec(id, btn); if(id === 'games') loadGames(); };
+})();
+
+var GM_CATS = { most_played: 'Most Played', winning_zone: 'Winning Zone', mega_wins: 'Mega Wins' };
+
+async function loadGames(){
+  try{
+    const g = await api('GET', '/api/games/all');
+    document.getElementById('gmTable').innerHTML = g.length ? g.map(function(x){
+      return '<tr>' +
+      '<td><img src="' + esc(x.imageUrl) + '" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:8px;"></td>' +
+      '<td style="font-weight:600">' + esc(x.name) + '</td>' +
+      '<td><span class="sub">' + esc(GM_CATS[x.category] || x.category) + '</span></td>' +
+      '<td>' + (x.bonus ? '<span class="badge b-ok">' + esc(x.bonus) + '</span>' : '<span class="sub">—</span>') + '</td>' +
+      '<td>' + (x.isActive ? '<span class="badge b-ok">active</span>' : '<span class="badge b-mut">disabled</span>') + '</td>' +
+      '<td style="white-space:nowrap">' +
+        '<button class="btn btn-d btn-sm" onclick="editGame(\'' + x.id + '\')">Edit</button> ' +
+        '<button class="btn btn-d btn-sm" onclick="toggleGame(\'' + x.id + '\',' + (!x.isActive) + ')">' + (x.isActive ? 'Disable' : 'Enable') + '</button> ' +
+        '<button class="btn btn-r btn-sm" onclick="delGame(\'' + x.id + '\')">Delete</button></td></tr>';
+    }).join('') : '<tr><td colspan="6"><div class="empty">No games yet</div></td></tr>';
+  }catch(e){ toast('Error', e.message, false); }
+}
+
+function gmImageData(){ return document.getElementById('gmPick_data').value; }
+function setGameImage(dataUrl){
+  var pv = document.getElementById('gmPick_pv'), img = document.getElementById('gmPick_img'),
+      zone = document.getElementById('gmPick_zone'), data = document.getElementById('gmPick_data');
+  if(!pv) return;
+  data.value = dataUrl || '';
+  if(dataUrl){ img.src = dataUrl; pv.classList.add('show'); zone.style.display = 'none'; }
+  else { pv.classList.remove('show'); zone.style.display = 'block'; }
+}
+
+async function saveGame(){
+  const id = document.getElementById('gmEditId').value;
+  const name = document.getElementById('gmName').value.trim();
+  const linkUrl = document.getElementById('gmLink').value.trim();
+  const imageUrl = gmImageData();
+  const bonus = document.getElementById('gmBonus').value.trim();
+  const category = document.getElementById('gmCat').value;
+  const isActive = document.getElementById('gmActive').value === 'true';
+  if(!name || !linkUrl){ toast('Required', 'Enter a game name and link.', false); return; }
+  if(!imageUrl){ toast('Required', 'Choose a game image.', false); return; }
+  try{
+    if(id){ await api('PUT', '/api/games/' + id, { name, linkUrl, imageUrl, bonus, category, isActive }); toast('Saved', 'Game updated.', true); }
+    else { await api('POST', '/api/games', { name, linkUrl, imageUrl, bonus, category, isActive }); toast('Saved', 'Game added.', true); }
+    resetGameForm(); loadGames();
+  }catch(e){ toast('Error', e.message, false); }
+}
+
+function editGame(id){
+  api('GET', '/api/games/all').then(function(g){
+    const x = g.find(function(y){ return y.id === id; });
+    if(!x) return;
+    document.getElementById('gmEditId').value = x.id;
+    document.getElementById('gmName').value = x.name;
+    document.getElementById('gmLink').value = x.linkUrl;
+    document.getElementById('gmBonus').value = x.bonus || '';
+    document.getElementById('gmCat').value = x.category;
+    document.getElementById('gmActive').value = String(!!x.isActive);
+    setGameImage(x.imageUrl);
+    document.getElementById('gmFormTitle').textContent = 'Edit game';
+    document.getElementById('gmSaveBtn').textContent = 'Update game';
+    document.getElementById('gmCancelBtn').style.display = 'inline-block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }).catch(function(e){ toast('Error', e.message, false); });
+}
+
+function resetGameForm(){
+  document.getElementById('gmEditId').value = '';
+  document.getElementById('gmName').value = '';
+  document.getElementById('gmLink').value = '';
+  document.getElementById('gmBonus').value = '';
+  document.getElementById('gmCat').value = 'most_played';
+  document.getElementById('gmActive').value = 'true';
+  setGameImage('');
+  document.getElementById('gmFormTitle').textContent = 'Add game';
+  document.getElementById('gmSaveBtn').textContent = 'Add game';
+  document.getElementById('gmCancelBtn').style.display = 'none';
+}
+
+async function toggleGame(id, on){ try{ await api('PUT', '/api/games/' + id, { isActive: on }); loadGames(); }catch(e){ toast('Error', e.message, false); } }
+async function delGame(id){ if(!confirm('Delete this game?')) return; try{ await api('DELETE', '/api/games/' + id); loadGames(); }catch(e){ toast('Error', e.message, false); } }
+
+/* Self-contained image picker for games (click to choose, auto-optimized) */
+(function initGamePicker(){
+  function init(){
+    var input = document.getElementById('gmImg');
+    if(!input || document.getElementById('gmPick_zone')) return;
+    input.style.display = 'none';
+    var wrap = document.createElement('div');
+    wrap.innerHTML =
+      '<div class="rc-img-picker" id="gmPick_zone">' +
+        '<span class="rc-picker-icon">🎮🖼️</span>' +
+        '<span class="rc-picker-text">Click to choose image</span>' +
+        '<span class="rc-picker-sub">PNG, JPG — auto-optimized</span>' +
+      '</div>' +
+      '<div class="rc-img-preview" id="gmPick_pv"><img id="gmPick_img"><button type="button" class="rc-img-remove" id="gmPick_rm">×</button></div>' +
+      '<input type="file" id="gmPick_file" accept="image/*" style="display:none">' +
+      '<input type="hidden" id="gmPick_data">';
+    input.parentNode.insertBefore(wrap, input.nextSibling);
+    var zone = document.getElementById('gmPick_zone'), fileIn = document.getElementById('gmPick_file'),
+        pv = document.getElementById('gmPick_pv'), pvImg = document.getElementById('gmPick_img');
+    zone.addEventListener('click', function(){ fileIn.click(); });
+    fileIn.addEventListener('change', function(e){
+      var file = e.target.files[0]; if(!file) return;
+      var img = new Image(), objUrl = URL.createObjectURL(file);
+      img.onload = function(){
+        URL.revokeObjectURL(objUrl);
+        var maxW = 800, w = img.width, h = img.height;
+        if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        document.getElementById('gmPick_data').value = dataUrl;
+        pvImg.src = dataUrl; pv.classList.add('show'); zone.style.display = 'none';
+      };
+      img.onerror = function(){ alert('Could not read image.'); };
+      img.src = objUrl;
+    });
+    document.getElementById('gmPick_rm').addEventListener('click', function(e){
+      e.stopPropagation(); setGameImage('');
+      document.getElementById('gmPick_file').value = '';
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
 })();
 </script>
 
