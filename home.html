@@ -3158,6 +3158,143 @@ document.querySelectorAll('.deposit-box').forEach(function(b){
 })();
 </script>
 
+<!-- ROYAL CASH — Notification Bell v1 -->
+<!-- Paste ONCE at the very END of home.html, BEFORE </body>. -->
+<!-- Shows in-app notifications (e.g. Deposit Approved) with shake + red dot. -->
+<style>
+#rcNotifBell{position:relative;flex:0 0 auto;width:40px;height:40px;border-radius:12px;border:1px solid rgba(168,85,247,.4);background:rgba(123,47,247,.15);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background .15s;margin:0 2px;padding:0;}
+#rcNotifBell:hover{background:rgba(123,47,247,.32);transform:translateY(-1px);}
+#rcNotifDot{position:absolute;top:5px;right:6px;min-width:17px;height:17px;border-radius:9px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #160b2e;box-shadow:0 2px 8px rgba(239,68,68,.6);}
+#rcNotifDot.show{display:flex;}
+#rcNotifBell.ring{animation:rcBellRing .9s ease;transform-origin:top center;}
+@keyframes rcBellRing{0%,100%{transform:rotate(0);}12%{transform:rotate(20deg);}25%{transform:rotate(-15deg);}38%{transform:rotate(10deg);}50%{transform:rotate(-7deg);}63%{transform:rotate(4deg);}75%{transform:rotate(-2deg);}}
+#rcNotifPanel{position:fixed;z-index:99990;width:340px;max-width:calc(100vw - 24px);max-height:430px;display:none;flex-direction:column;background:linear-gradient(135deg,#1a1033,#2d1b4e);border:1px solid rgba(168,85,247,.45);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden;color:#fff;}
+#rcNotifPanel.show{display:flex;}
+.rc-notif-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(168,85,247,.25);}
+.rc-notif-head h4{margin:0;font-size:15px;color:#fff;}
+.rc-notif-close{background:transparent;border:none;color:#9ca3af;font-size:18px;cursor:pointer;line-height:1;}
+.rc-notif-list{overflow-y:auto;padding:8px;}
+.rc-notif-item{padding:11px 12px;border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,.03);border:1px solid transparent;}
+.rc-notif-item.unread{background:rgba(123,47,247,.14);border-color:rgba(168,85,247,.35);}
+.rc-notif-title{font-size:13.5px;font-weight:700;color:#fff;margin-bottom:3px;}
+.rc-notif-msg{font-size:12.5px;color:#c4b5fd;line-height:1.45;}
+.rc-notif-time{font-size:11px;color:#6b7280;margin-top:5px;}
+.rc-notif-empty{text-align:center;color:#9ca3af;font-size:13px;padding:26px 10px;}
+@media (max-width:480px){
+  #rcNotifBell{width:36px;height:36px;font-size:17px;border-radius:10px;}
+}
+@media (max-width:380px){
+  #rcNotifBell{width:32px;height:32px;font-size:15px;}
+}
+</style>
+<div id="rcNotifPanel">
+  <div class="rc-notif-head"><h4>🔔 Notifications</h4><button class="rc-notif-close" id="rcNotifClose" aria-label="Close">✕</button></div>
+  <div class="rc-notif-list" id="rcNotifList"><div class="rc-notif-empty">Loading…</div></div>
+</div>
+<script>
+(function(){
+if(window.__rcNotif) return; window.__rcNotif = 1;
+var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+var bell = null, panel = null, list = null, dot = null;
+var lastUnread = 0, firstLoad = true;
+
+function token(){ return localStorage.getItem('token') || ''; }
+function isLoggedIn(){ try{ return !!JSON.parse(localStorage.getItem('user')||'{}').id; }catch(e){ return false; } }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function timeAgo(t){
+  try{
+    var s = Math.floor((Date.now() - new Date(t).getTime())/1000);
+    if(s < 60) return 'Just now';
+    if(s < 3600) return Math.floor(s/60) + 'm ago';
+    if(s < 86400) return Math.floor(s/3600) + 'h ago';
+    return Math.floor(s/86400) + 'd ago';
+  }catch(e){ return ''; }
+}
+
+function buildBell(){
+  if(!isLoggedIn()) return;
+  bell = document.createElement('button');
+  bell.id = 'rcNotifBell';
+  bell.setAttribute('aria-label','Notifications');
+  bell.innerHTML = '🔔<span id="rcNotifDot"></span>';
+  var anchor = document.querySelector('.user-profile');
+  if(anchor && anchor.parentElement){ anchor.parentElement.insertBefore(bell, anchor); }
+  else { document.body.appendChild(bell); bell.style.position='fixed'; bell.style.top='12px'; bell.style.right='12px'; bell.style.zIndex='99990'; }
+  dot = document.getElementById('rcNotifDot');
+  panel = document.getElementById('rcNotifPanel');
+  list = document.getElementById('rcNotifList');
+  bell.addEventListener('click', function(e){ e.stopPropagation(); togglePanel(); });
+  document.getElementById('rcNotifClose').addEventListener('click', function(){ panel.classList.remove('show'); });
+  document.addEventListener('click', function(e){ if(panel.classList.contains('show') && !panel.contains(e.target)) panel.classList.remove('show'); });
+}
+
+function placePanel(){
+  var r = bell.getBoundingClientRect();
+  var w = Math.min(340, window.innerWidth - 24);
+  panel.style.top = (r.bottom + 10) + 'px';
+  var left = r.right - w;
+  if(left < 12) left = 12;
+  var maxLeft = window.innerWidth - w - 12;
+  if(left > maxLeft) left = maxLeft;
+  panel.style.left = left + 'px';
+}
+
+function togglePanel(){
+  if(panel.classList.contains('show')){ panel.classList.remove('show'); return; }
+  placePanel();
+  panel.classList.add('show');
+  fetchNotifs(true);
+}
+
+async function fetchNotifs(markRead){
+  if(!bell) return;
+  try{
+    var res = await fetch(BACKEND + '/api/notifications', { headers: { 'Authorization': 'Bearer ' + token() } });
+    if(!res.ok) return;
+    var items = await res.json();
+    if(!Array.isArray(items)) items = [];
+    renderList(items);
+    var unread = items.filter(function(n){ return !n.isRead; }).length;
+    updateDot(unread);
+    if(!firstLoad && unread > lastUnread){
+      bell.classList.remove('ring'); void bell.offsetWidth; bell.classList.add('ring');
+    }
+    lastUnread = unread; firstLoad = false;
+    if(markRead && unread > 0){
+      var ids = items.filter(function(n){ return !n.isRead; }).map(function(n){ return n.id; });
+      await Promise.all(ids.map(function(id){
+        return fetch(BACKEND + '/api/notifications/' + id + '/read', { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token() } }).catch(function(){});
+      }));
+      updateDot(0); lastUnread = 0;
+      renderList(items.map(function(n){ n.isRead = true; return n; }));
+    }
+  }catch(e){}
+}
+
+function updateDot(n){
+  if(!dot) return;
+  if(n > 0){ dot.textContent = n > 9 ? '9+' : String(n); dot.classList.add('show'); }
+  else { dot.classList.remove('show'); }
+}
+
+function renderList(items){
+  if(!items.length){ list.innerHTML = '<div class="rc-notif-empty">No notifications yet.</div>'; return; }
+  list.innerHTML = items.map(function(n){
+    return '<div class="rc-notif-item' + (n.isRead ? '' : ' unread') + '">' +
+      '<div class="rc-notif-title">' + esc(n.title || 'Notification') + '</div>' +
+      '<div class="rc-notif-msg">' + esc(n.message || '') + '</div>' +
+      '<div class="rc-notif-time">' + esc(timeAgo(n.createdAt)) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+buildBell();
+if(bell){
+  fetchNotifs(false);
+  setInterval(function(){ fetchNotifs(false); }, 30000);
+}
+})();
+</script>
 
 
 
