@@ -2956,13 +2956,37 @@ if (bonus.includes("%")) {
 .rc-dep-label{display:block;font-size:12px;color:#a78bfa;margin:0 0 6px;font-weight:600;}
 .rc-dep-input{width:100%;box-sizing:border-box;background:rgba(20,7,34,.9);border:1px solid #4b5563;border-radius:10px;color:#fff;font-size:14px;padding:11px 12px;margin-bottom:12px;outline:none;}
 .rc-dep-input:focus{border-color:#a855f7;}
-.rc-dep-submit{width:100%;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,#7b2ff7,#f107a3);}
-.rc-dep-submit:disabled{opacity:.5;cursor:wait;}
+.rc-dep-submit{width:100%;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;letter-spacing:.5px;color:#fff;cursor:pointer;background:linear-gradient(135deg,#7b2ff7,#f107a3);box-shadow:0 8px 24px rgba(241,7,163,.35);transition:transform .15s,box-shadow .15s;}
+.rc-dep-submit:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(241,7,163,.55);}
+.rc-dep-submit:active{transform:translateY(0);}
+.rc-dep-submit:disabled{opacity:.5;cursor:wait;transform:none;box-shadow:none;}
+.rc-dep-file{display:flex;align-items:center;gap:10px;background:rgba(20,7,34,.9);border:1px dashed rgba(168,85,247,.6);border-radius:10px;color:#c4b5fd;font-size:14px;font-weight:600;padding:12px 14px;cursor:pointer;margin-bottom:12px;transition:border-color .15s,background .15s;}
+.rc-dep-file:hover{border-color:#f107a3;background:rgba(241,7,163,.08);color:#fff;}
+.rc-dep-file-icon{font-size:18px;flex:0 0 auto;}
+#rcDepFileText{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Moving stylish stars background */
+.rc-dep-card{position:relative;}
+.rc-stars{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;border-radius:inherit;}
+.rc-star{position:absolute;border-radius:50%;animation:rcStarMove linear infinite;}
+@keyframes rcStarMove{
+  0%{transform:translateY(24px);opacity:0;}
+  15%{opacity:.95;}
+  85%{opacity:.95;}
+  100%{transform:translateY(-150px);opacity:0;}
+}
+.rc-dep-card > *:not(.rc-stars){position:relative;z-index:1;}
+@media (max-width:480px){
+  .rc-dep-card{padding:20px 16px;border-radius:16px;}
+  .rc-dep-head h3{font-size:18px;}
+  .rc-dep-input{font-size:16px;}
+  .rc-dep-submit{font-size:15px;padding:14px;}
+  .rc-dep-file{font-size:13px;}
+}
 .rc-dep-msg{font-size:13px;margin-top:10px;min-height:18px;color:#fbbf24;text-align:center;}
 .rc-dep-msg.ok{color:#4ade80;}
 .rc-dep-empty{text-align:center;color:#9ca3af;font-size:13px;padding:18px 0;}
-.rc-dep-back{background:transparent;border:none;color:#a78bfa;font-size:13px;font-weight:600;cursor:pointer;padding:0;margin:0 0 10px;display:inline-block;}
-.rc-dep-back:hover{color:#c4b5fd;}
+.rc-dep-back{background:rgba(123,47,247,.15);border:1px solid rgba(168,85,247,.55);color:#d8b4fe;font-size:13px;font-weight:700;cursor:pointer;padding:8px 14px;margin:0 0 12px;display:inline-block;border-radius:10px;}
+.rc-dep-back:hover{background:rgba(123,47,247,.32);color:#fff;border-color:#a855f7;}
 .rc-dep-selected{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #f107a3;background:rgba(241,7,163,.12);border-radius:12px;font-size:15px;font-weight:700;color:#fff;margin-bottom:12px;}
 .rc-dep-selected .dot{width:14px;height:14px;border-radius:50%;background:#f107a3;flex:0 0 auto;}
 </style>
@@ -3060,7 +3084,8 @@ function selectMethod(id){
     '<label class="rc-dep-label">Transaction ID</label>' +
     '<input class="rc-dep-input" id="rcDepTxid" type="text" placeholder="Enter transaction / reference ID">' +
     '<label class="rc-dep-label">Transaction Screenshot</label>' +
-    '<input class="rc-dep-input" id="rcDepShot" type="file" accept="image/*">' +
+    '<label class="rc-dep-file" for="rcDepShot"><span class="rc-dep-file-icon">📎</span><span id="rcDepFileText">Choose screenshot…</span></label>' +
+    '<input id="rcDepShot" type="file" accept="image/*" hidden>' +
     '<div id="rcDepPreview" style="display:none;margin:-6px 0 12px;"><img id="rcDepPreviewImg" alt="Screenshot preview" style="max-width:100%;max-height:120px;border-radius:8px;border:1px solid #4b5563;"></div>' +
     '<button class="rc-dep-submit" id="rcDepSubmit">Submit Deposit Request</button>';
   body.innerHTML = h;
@@ -3069,6 +3094,7 @@ function selectMethod(id){
   document.getElementById('rcDepShot').addEventListener('change', function(){
     var f = this.files[0];
     if(f && f.type.indexOf('image/') === 0){
+      document.getElementById('rcDepFileText').textContent = f.name;
       var r = new FileReader();
       r.onload = function(e){
         document.getElementById('rcDepPreviewImg').src = e.target.result;
@@ -3108,6 +3134,27 @@ async function submitDeposit(){
 document.querySelectorAll('.deposit-box').forEach(function(b){
   b.addEventListener('click', openModal);
 });
+
+/* Stylish moving stars in the card background */
+(function makeStars(){
+  var card = modal.querySelector('.rc-dep-card');
+  if(!card || card.querySelector('.rc-stars')) return;
+  var s = document.createElement('div');
+  s.className = 'rc-stars';
+  var html = '';
+  for(var i = 0; i < 30; i++){
+    var left = (Math.random()*100).toFixed(1);
+    var top = (Math.random()*100).toFixed(1);
+    var size = (Math.random()*2+1).toFixed(1);
+    var dur = (Math.random()*7+6).toFixed(1);
+    var delay = (Math.random()*9).toFixed(1);
+    var c = Math.random();
+    var col = c < .65 ? '255,255,255' : (c < .85 ? '216,180,254' : '249,168,212');
+    html += '<span class="rc-star" style="left:'+left+'%;top:'+top+'%;width:'+size+'px;height:'+size+'px;background:rgba('+col+',.95);box-shadow:0 0 7px rgba('+col+',.85);animation-duration:'+dur+'s;animation-delay:-'+delay+'s;"></span>';
+  }
+  s.innerHTML = html;
+  card.insertBefore(s, card.firstChild);
+})();
 })();
 </script>
 
