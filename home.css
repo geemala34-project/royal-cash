@@ -7995,3 +7995,44 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   color:#fff !important;
 }
 
+/* Game card polish — bonus badge, image fit, name style */
+#games .compact-game-section .game-card .game-bonus-badge{
+  width:auto !important;
+  min-width:64px !important;
+  max-width:calc(100% - 14px) !important;
+  height:auto !important;
+  min-height:32px !important;
+  padding:5px 10px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  display:inline-flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:13px !important;
+  line-height:1.25 !important;
+}
+#games .compact-game-section .game-card .game-bonus-badge span{
+  font-size:7px !important;
+  line-height:1 !important;
+}
+#games .compact-game-section .card-media{
+  display:block !important;
+  position:relative !important;
+  overflow:hidden !important;
+  padding:0 !important;
+}
+#games .compact-game-section .card-media img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center !important;
+  display:block !important;
+}
+#games .compact-game-section .card-body h3{
+  background:linear-gradient(180deg,#ffffff 30%,#d8b4fe 100%) !important;
+  -webkit-background-clip:text !important;
+  background-clip:text !important;
+  -webkit-text-fill-color:transparent !important;
+  letter-spacing:.3px !important;
+}
