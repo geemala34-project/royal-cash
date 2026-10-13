@@ -1113,6 +1113,24 @@ async function linkSubscription(uid){
     localStorage.setItem('rc_push_linked', '1');
   }catch(e){}
 }
+async function keepAlive(){
+  /* Har page-load par subscription refresh: dead/expired endpoint ko dobara server par save karo.
+     Agar device par subscription hi nahi rahi to state reset taake user dobara Enable kare. */
+  if(!isDone()) return;
+  try{
+    var reg = await navigator.serviceWorker.getRegistration();
+    var sub = reg ? await reg.pushManager.getSubscription() : null;
+    if(!sub){
+      localStorage.removeItem('rc_push_done');
+      localStorage.removeItem('rc_push_choice');
+      localStorage.removeItem('rc_push_linked');
+      maybeShow(); refresh();
+      return;
+    }
+    var user = JSON.parse(localStorage.getItem('user') || '{}');
+    await fetch(BACKEND + '/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON(), userId: user.id || null }) });
+  }catch(e){}
+}
 function maybeShow(){
   if(!choiceMade()){
     document.getElementById('rcPushPanel').classList.add('show');
@@ -1130,6 +1148,7 @@ setInterval(function(){
     if(!user.id){ localStorage.removeItem('rc_push_choice'); localStorage.removeItem('rc_push_linked'); }
   }catch(e){}
 }, 4000);
+keepAlive(); /* page load par dead/expired subscription ko refresh karo */
 maybeShow();
 refresh();
 })();
