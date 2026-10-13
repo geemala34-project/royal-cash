@@ -2961,6 +2961,10 @@ if (bonus.includes("%")) {
 .rc-dep-msg{font-size:13px;margin-top:10px;min-height:18px;color:#fbbf24;text-align:center;}
 .rc-dep-msg.ok{color:#4ade80;}
 .rc-dep-empty{text-align:center;color:#9ca3af;font-size:13px;padding:18px 0;}
+.rc-dep-back{background:transparent;border:none;color:#a78bfa;font-size:13px;font-weight:600;cursor:pointer;padding:0;margin:0 0 10px;display:inline-block;}
+.rc-dep-back:hover{color:#c4b5fd;}
+.rc-dep-selected{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #f107a3;background:rgba(241,7,163,.12);border-radius:12px;font-size:15px;font-weight:700;color:#fff;margin-bottom:12px;}
+.rc-dep-selected .dot{width:14px;height:14px;border-radius:50%;background:#f107a3;flex:0 0 auto;}
 </style>
 <div id="rcDepModal">
   <div class="rc-dep-card">
@@ -3009,37 +3013,71 @@ async function loadMethods(){
 }
 
 function renderMethods(){
+  /* STEP 1: sirf methods ki list */
   if(!methods.length){ body.innerHTML = '<div class="rc-dep-empty">No payment methods available right now.</div>'; return; }
-  var h = '<label class="rc-dep-label">1. Select payment method</label><div class="rc-dep-methods">';
+  var h = '<label class="rc-dep-label">Select payment method</label><div class="rc-dep-methods">';
   h += methods.map(function(m){
     return '<div class="rc-dep-method" data-id="' + esc(m.id) + '"><span class="dot"></span><span>' + esc(m.name) + '</span></div>';
   }).join('') + '</div>';
-  h += '<div class="rc-dep-details" id="rcDepDetails"></div>';
-  h += '<div id="rcDepForm" style="display:none;">' +
-    '<label class="rc-dep-label">2. Amount ($)</label>' +
-    '<input class="rc-dep-input" id="rcDepAmount" type="number" min="1" step="any" placeholder="Enter amount">' +
-    '<label class="rc-dep-label">3. Transaction ID</label>' +
-    '<input class="rc-dep-input" id="rcDepTxid" type="text" placeholder="Enter transaction / reference ID">' +
-    '<button class="rc-dep-submit" id="rcDepSubmit">Submit Deposit Request</button>' +
-    '</div>';
   body.innerHTML = h;
   body.querySelectorAll('.rc-dep-method').forEach(function(el){
     el.addEventListener('click', function(){ selectMethod(el.getAttribute('data-id')); });
   });
-  document.getElementById('rcDepSubmit').addEventListener('click', submitDeposit);
+}
+
+function compressImage(file){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var max = 1024, w = img.width, h = img.height;
+        if(w > max || h > max){ var ratio = Math.min(max / w, max / h); w = Math.round(w * ratio); h = Math.round(h * ratio); }
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', 0.75));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function selectMethod(id){
+  /* STEP 2: sirf selected method ka alag view */
   selectedId = id;
-  body.querySelectorAll('.rc-dep-method').forEach(function(el){
-    el.classList.toggle('sel', el.getAttribute('data-id') === id);
-  });
-  var m = methods.find(function(x){ return String(x.id) === String(id); });
-  var d = document.getElementById('rcDepDetails');
-  d.textContent = m ? m.details : '';
-  d.classList.add('show');
-  document.getElementById('rcDepForm').style.display = 'block';
+  var m = null;
+  for(var i = 0; i < methods.length; i++){ if(String(methods[i].id) === String(id)){ m = methods[i]; break; } }
+  if(!m){ renderMethods(); return; }
+  var h = '<button class="rc-dep-back" id="rcDepBack">← Change method</button>';
+  h += '<div class="rc-dep-selected"><span class="dot"></span><span>' + esc(m.name) + '</span></div>';
+  h += '<div class="rc-dep-details show">' + esc(m.details) + '</div>';
+  h += '<label class="rc-dep-label">Amount ($)</label>' +
+    '<input class="rc-dep-input" id="rcDepAmount" type="number" min="1" step="any" placeholder="Enter amount">' +
+    '<label class="rc-dep-label">Transaction ID</label>' +
+    '<input class="rc-dep-input" id="rcDepTxid" type="text" placeholder="Enter transaction / reference ID">' +
+    '<label class="rc-dep-label">Transaction Screenshot</label>' +
+    '<input class="rc-dep-input" id="rcDepShot" type="file" accept="image/*">' +
+    '<div id="rcDepPreview" style="display:none;margin:-6px 0 12px;"><img id="rcDepPreviewImg" alt="Screenshot preview" style="max-width:100%;max-height:120px;border-radius:8px;border:1px solid #4b5563;"></div>' +
+    '<button class="rc-dep-submit" id="rcDepSubmit">Submit Deposit Request</button>';
+  body.innerHTML = h;
   msg('');
+  document.getElementById('rcDepBack').addEventListener('click', function(){ selectedId = null; renderMethods(); msg(''); });
+  document.getElementById('rcDepShot').addEventListener('change', function(){
+    var f = this.files[0];
+    if(f && f.type.indexOf('image/') === 0){
+      var r = new FileReader();
+      r.onload = function(e){
+        document.getElementById('rcDepPreviewImg').src = e.target.result;
+        document.getElementById('rcDepPreview').style.display = 'block';
+      };
+      r.readAsDataURL(f);
+    }
+  });
+  document.getElementById('rcDepSubmit').addEventListener('click', submitDeposit);
 }
 
 async function submitDeposit(){
@@ -3049,13 +3087,16 @@ async function submitDeposit(){
   if(!selectedId){ msg('Please select a payment method.'); return; }
   if(!(amount > 0)){ msg('Please enter a valid amount.'); return; }
   if(!txid){ msg('Please enter the transaction ID.'); return; }
+  var shotFile = document.getElementById('rcDepShot').files[0];
+  if(!shotFile){ msg('Please attach the transaction screenshot.'); return; }
   var btn = document.getElementById('rcDepSubmit');
-  btn.disabled = true; btn.textContent = 'Submitting…';
+  btn.disabled = true; btn.textContent = 'Uploading…';
   try{
+    var shotUrl = await compressImage(shotFile);
     var res = await fetch(BACKEND + '/api/deposits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
-      body: JSON.stringify({ paymentMethodId: selectedId, amount: amount, transactionId: txid, screenshotUrl: '' })
+      body: JSON.stringify({ paymentMethodId: selectedId, amount: amount, transactionId: txid, screenshotUrl: shotUrl })
     });
     var data = await res.json().catch(function(){ return {}; });
     if(!res.ok) throw new Error(data.message || 'Server error ' + res.status);
@@ -3069,6 +3110,7 @@ document.querySelectorAll('.deposit-box').forEach(function(b){
 });
 })();
 </script>
+
 
 
 
