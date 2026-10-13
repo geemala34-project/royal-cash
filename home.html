@@ -3322,13 +3322,14 @@ if(bell){
 })();
 </script>
 
-<!-- ROYAL CASH — Dynamic Game Cards v1 -->
+<!-- ROYAL CASH — Dynamic Game Cards v2 -->
 <!-- Paste ONCE at the very END of home.html, BEFORE </body>. -->
-<!-- Renders game cards from GET /api/games (managed in admin panel). -->
+<!-- Fills the EXISTING placeholder cards with games from GET /api/games (managed in admin panel). -->
+<!-- Sections with no games keep their original placeholder cards untouched. -->
 <style>
 .compact-game-section .card-media img{width:100% !important;height:100% !important;object-fit:cover !important;display:block !important;}
 .compact-game-section .card-media{overflow:hidden !important;}
-.rc-games-empty{color:#9ca3af;font-size:13px;text-align:center;padding:22px 10px;flex:0 0 100%;}
+.compact-game-section .game-card .game-bonus-badge:empty{display:none !important;}
 </style>
 <script>
 (function(){
@@ -3353,21 +3354,34 @@ function sectionRow(title){
   return null;
 }
 
-function gameCard(g){
-  var a = document.createElement('article');
-  a.className = 'game-card';
-  a.setAttribute('data-bonus', g.bonus || '');
-  a.innerHTML =
-    '<div class="game-bonus-badge"></div>' +
-    '<div class="card-media"><img src="' + esc(g.imageUrl) + '" alt="' + esc(g.name) + '" loading="lazy"></div>' +
-    '<div class="card-body"><h3>' + esc(g.name) + '</h3>' +
-    '<button class="play-btn" type="button">Play Now <span>→</span></button></div>';
-  a.querySelector('.play-btn').addEventListener('click', function(e){
-    e.stopPropagation();
-    if(g.linkUrl) window.open(g.linkUrl, '_blank', 'noopener');
+/* Save original placeholder cards so empty sections look exactly like before */
+var originals = {};
+CATS.forEach(function(c){
+  var row = sectionRow(c.title);
+  if(row) originals[c.key] = row.innerHTML;
+});
+
+function hideEmptyBadges(row){
+  row.querySelectorAll('.game-bonus-badge').forEach(function(b){
+    if(!(b.getAttribute('data-bonus') || '').trim()) b.style.display = 'none';
   });
-  if(window.RoyalCashSetGameBonus) window.RoyalCashSetGameBonus(a, g.bonus || '');
-  return a;
+}
+
+function fillCard(card, g){
+  var h3 = card.querySelector('h3');
+  if(h3) h3.textContent = g.name;
+  var media = card.querySelector('.card-media');
+  if(media) media.innerHTML = '<img src="' + esc(g.imageUrl) + '" alt="' + esc(g.name) + '" loading="lazy">';
+  card.setAttribute('data-bonus', g.bonus || '');
+  if(window.RoyalCashSetGameBonus) window.RoyalCashSetGameBonus(card, g.bonus || '');
+  var btn = card.querySelector('.play-btn');
+  if(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(g.linkUrl) window.open(g.linkUrl, '_blank', 'noopener');
+    });
+  }
+  card.classList.remove('search-hidden');
 }
 
 function bindSearch(){
@@ -3393,13 +3407,20 @@ async function loadGames(){
   CATS.forEach(function(c){
     var row = sectionRow(c.title);
     if(!row) return;
-    row.innerHTML = '';
     var list = games.filter(function(g){ return (g.category || 'most_played') === c.key; });
     if(!list.length){
-      row.innerHTML = '<div class="rc-games-empty">No games yet — check back soon.</div>';
+      row.innerHTML = originals[c.key] || '';
+      hideEmptyBadges(row);
       return;
     }
-    list.forEach(function(g){ row.appendChild(gameCard(g)); });
+    var cards = row.querySelectorAll('.game-card');
+    if(!cards.length) return;
+    list.forEach(function(g, i){
+      var card;
+      if(i < cards.length){ card = cards[i]; }
+      else { card = cards[0].cloneNode(true); row.appendChild(card); }
+      fillCard(card, g);
+    });
   });
   bindSearch();
 }
@@ -3408,6 +3429,7 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
 else loadGames();
 })();
 </script>
+
 
 
   
