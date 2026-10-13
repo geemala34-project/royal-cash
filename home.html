@@ -2933,6 +2933,142 @@ if (bonus.includes("%")) {
 })();
 </script>
 
+<!-- ROYAL CASH — Deposit Modal v1 -->
+<!-- home.html ke bilkul END me, </body> se PEHLE paste karo. Sirf ek dafa. -->
+<!-- NOTE: iske saath backend me GET /api/payment-methods/active endpoint bhi chahiye (alag step). -->
+<style>
+#rcDepModal{position:fixed;inset:0;z-index:99990;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);padding:16px;}
+#rcDepModal.show{display:flex;}
+.rc-dep-card{width:100%;max-width:420px;max-height:90vh;overflow-y:auto;background:linear-gradient(135deg,#1a1033,#2d1b4e);border:1px solid rgba(168,85,247,.4);border-radius:20px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:rcDepPop .25s ease;color:#fff;}
+@keyframes rcDepPop{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
+.rc-dep-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.rc-dep-head h3{margin:0;font-size:20px;color:#fff;}
+.rc-dep-close{background:transparent;border:none;color:#9ca3af;font-size:22px;cursor:pointer;line-height:1;}
+.rc-dep-sub{margin:0 0 16px;font-size:13px;color:#a78bfa;}
+.rc-dep-methods{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.rc-dep-method{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #374151;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;color:#e5e7eb;transition:border-color .15s,background .15s;}
+.rc-dep-method:hover{border-color:#7b2ff7;}
+.rc-dep-method.sel{border-color:#f107a3;background:rgba(241,7,163,.12);}
+.rc-dep-method .dot{width:14px;height:14px;border-radius:50%;border:2px solid #6b7280;flex:0 0 auto;}
+.rc-dep-method.sel .dot{border-color:#f107a3;background:#f107a3;}
+.rc-dep-details{background:rgba(123,47,247,.12);border:1px dashed rgba(168,85,247,.5);border-radius:12px;padding:12px 14px;font-size:13px;color:#ddd6fe;white-space:pre-wrap;margin-bottom:14px;display:none;}
+.rc-dep-details.show{display:block;}
+.rc-dep-label{display:block;font-size:12px;color:#a78bfa;margin:0 0 6px;font-weight:600;}
+.rc-dep-input{width:100%;box-sizing:border-box;background:rgba(20,7,34,.9);border:1px solid #4b5563;border-radius:10px;color:#fff;font-size:14px;padding:11px 12px;margin-bottom:12px;outline:none;}
+.rc-dep-input:focus{border-color:#a855f7;}
+.rc-dep-submit{width:100%;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(135deg,#7b2ff7,#f107a3);}
+.rc-dep-submit:disabled{opacity:.5;cursor:wait;}
+.rc-dep-msg{font-size:13px;margin-top:10px;min-height:18px;color:#fbbf24;text-align:center;}
+.rc-dep-msg.ok{color:#4ade80;}
+.rc-dep-empty{text-align:center;color:#9ca3af;font-size:13px;padding:18px 0;}
+</style>
+<div id="rcDepModal">
+  <div class="rc-dep-card">
+    <div class="rc-dep-head">
+      <h3>💰 Deposit</h3>
+      <button class="rc-dep-close" id="rcDepClose" aria-label="Close">✕</button>
+    </div>
+    <p class="rc-dep-sub">Select a payment method, send the money, then submit your request.</p>
+    <div id="rcDepBody"><div class="rc-dep-empty">Loading payment methods…</div></div>
+    <div class="rc-dep-msg" id="rcDepMsg"></div>
+  </div>
+</div>
+<script>
+(function(){
+if(window.__rcDep) return; window.__rcDep = 1;
+var BACKEND = 'https://royal-cash-backend-production-04cf.up.railway.app';
+var modal = document.getElementById('rcDepModal');
+var body = document.getElementById('rcDepBody');
+var msgEl = document.getElementById('rcDepMsg');
+var methods = [], selectedId = null;
+
+function token(){ return localStorage.getItem('token') || ''; }
+function isLoggedIn(){ try{ return !!JSON.parse(localStorage.getItem('user')||'{}').id; }catch(e){ return false; } }
+function msg(t, ok){ msgEl.textContent = t; msgEl.className = 'rc-dep-msg' + (ok ? ' ok' : ''); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function openModal(){
+  if(!isLoggedIn()){ window.location.href = 'mid-page.html'; return; }
+  selectedId = null; msg('');
+  modal.classList.add('show');
+  loadMethods();
+}
+function closeModal(){ modal.classList.remove('show'); }
+modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+document.getElementById('rcDepClose').addEventListener('click', closeModal);
+
+async function loadMethods(){
+  body.innerHTML = '<div class="rc-dep-empty">Loading payment methods…</div>';
+  try{
+    var res = await fetch(BACKEND + '/api/payment-methods/active', { headers: { 'Authorization': 'Bearer ' + token() } });
+    if(res.status === 401 || res.status === 403){ msg('Session expired. Please login again.'); setTimeout(function(){ window.location.href='mid-page.html'; }, 1500); return; }
+    if(!res.ok) throw new Error('Server error ' + res.status);
+    methods = await res.json();
+    renderMethods();
+  }catch(e){ body.innerHTML = '<div class="rc-dep-empty">Could not load payment methods. Please try again later.</div>'; }
+}
+
+function renderMethods(){
+  if(!methods.length){ body.innerHTML = '<div class="rc-dep-empty">No payment methods available right now.</div>'; return; }
+  var h = '<label class="rc-dep-label">1. Select payment method</label><div class="rc-dep-methods">';
+  h += methods.map(function(m){
+    return '<div class="rc-dep-method" data-id="' + esc(m.id) + '"><span class="dot"></span><span>' + esc(m.name) + '</span></div>';
+  }).join('') + '</div>';
+  h += '<div class="rc-dep-details" id="rcDepDetails"></div>';
+  h += '<div id="rcDepForm" style="display:none;">' +
+    '<label class="rc-dep-label">2. Amount ($)</label>' +
+    '<input class="rc-dep-input" id="rcDepAmount" type="number" min="1" step="any" placeholder="Enter amount">' +
+    '<label class="rc-dep-label">3. Transaction ID</label>' +
+    '<input class="rc-dep-input" id="rcDepTxid" type="text" placeholder="Enter transaction / reference ID">' +
+    '<button class="rc-dep-submit" id="rcDepSubmit">Submit Deposit Request</button>' +
+    '</div>';
+  body.innerHTML = h;
+  body.querySelectorAll('.rc-dep-method').forEach(function(el){
+    el.addEventListener('click', function(){ selectMethod(el.getAttribute('data-id')); });
+  });
+  document.getElementById('rcDepSubmit').addEventListener('click', submitDeposit);
+}
+
+function selectMethod(id){
+  selectedId = id;
+  body.querySelectorAll('.rc-dep-method').forEach(function(el){
+    el.classList.toggle('sel', el.getAttribute('data-id') === id);
+  });
+  var m = methods.find(function(x){ return String(x.id) === String(id); });
+  var d = document.getElementById('rcDepDetails');
+  d.textContent = m ? m.details : '';
+  d.classList.add('show');
+  document.getElementById('rcDepForm').style.display = 'block';
+  msg('');
+}
+
+async function submitDeposit(){
+  msg('');
+  var amount = parseFloat(document.getElementById('rcDepAmount').value);
+  var txid = document.getElementById('rcDepTxid').value.trim();
+  if(!selectedId){ msg('Please select a payment method.'); return; }
+  if(!(amount > 0)){ msg('Please enter a valid amount.'); return; }
+  if(!txid){ msg('Please enter the transaction ID.'); return; }
+  var btn = document.getElementById('rcDepSubmit');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try{
+    var res = await fetch(BACKEND + '/api/deposits', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+      body: JSON.stringify({ paymentMethodId: selectedId, amount: amount, transactionId: txid, screenshotUrl: '' })
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if(!res.ok) throw new Error(data.message || 'Server error ' + res.status);
+    body.innerHTML = '<div class="rc-dep-empty" style="color:#4ade80;font-size:15px;font-weight:700;">✅ Request submitted!<br><span style="font-weight:400;font-size:13px;color:#a78bfa;">Your deposit is pending approval. The amount will be added to your wallet once approved.</span></div>';
+    msg('');
+  }catch(e){ msg('Error: ' + e.message); btn.disabled = false; btn.textContent = 'Submit Deposit Request'; }
+}
+
+document.querySelectorAll('.deposit-box').forEach(function(b){
+  b.addEventListener('click', openModal);
+});
+})();
+</script>
 
   
 </body>
