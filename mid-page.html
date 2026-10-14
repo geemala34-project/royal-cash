@@ -1113,24 +1113,29 @@ async function linkSubscription(uid){
     localStorage.setItem('rc_push_linked', '1');
   }catch(e){}
 }
+    
 async function keepAlive(){
-  /* Har page-load par subscription refresh: dead/expired endpoint ko dobara server par save karo.
-     Agar device par subscription hi nahi rahi to state reset taake user dobara Enable kare. */
+  /* Dead endpoint fix: re-saving the same subscription is not enough — the push
+     service can invalidate the endpoint while the browser still holds the object.
+     So take a FRESH subscription every 24 hours to keep the endpoint always valid. */
   if(!isDone()) return;
   try{
     var reg = await navigator.serviceWorker.getRegistration();
-    var sub = reg ? await reg.pushManager.getSubscription() : null;
-    if(!sub){
-      localStorage.removeItem('rc_push_done');
-      localStorage.removeItem('rc_push_choice');
-      localStorage.removeItem('rc_push_linked');
-      maybeShow(); refresh();
-      return;
+    if(!reg) return;
+    var sub = await reg.pushManager.getSubscription();
+    var lastRefresh = parseInt(localStorage.getItem('rc_push_refresh') || '0', 10);
+    var needFresh = !sub || (Date.now() - lastRefresh > 24*60*60*1000);
+    if(needFresh){
+      if(sub){ try{ await sub.unsubscribe(); }catch(e){} }
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(VAPID) });
+      localStorage.setItem('rc_push_refresh', String(Date.now()));
     }
     var user = JSON.parse(localStorage.getItem('user') || '{}');
     await fetch(BACKEND + '/api/push/subscribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON(), userId: user.id || null }) });
   }catch(e){}
 }
+
+    
 function maybeShow(){
   if(!choiceMade()){
     document.getElementById('rcPushPanel').classList.add('show');
