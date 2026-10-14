@@ -8047,7 +8047,7 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   box-shadow:0 10px 30px rgba(255,45,150,.20), inset 0 0 0 1px rgba(255,255,255,.06);
 }
 #games .compact-game-section .game-card:has(.card-media img) .card-media{
-  position:absolute; inset:0;
+  position:absolute !important; inset:0 !important;
 }
 #games .compact-game-section .game-card:has(.card-media img) .card-media img{
   width:100%; height:100%; object-fit:cover; display:block;
@@ -8067,8 +8067,8 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   margin:0; padding:6px 12px 0; text-align:center;
   font-size:21px; font-weight:800; letter-spacing:.6px; line-height:1.15;
   text-transform:capitalize;
-  background:linear-gradient(180deg,#ffffff 15%,#ffe9a8 45%,#ffb52e 75%,#ff8a00);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
+  background:linear-gradient(180deg,#ffffff 15%,#ffe9a8 45%,#ffb52e 75%,#ff8a00) !important;
+  -webkit-background-clip:text !important; background-clip:text !important; color:transparent;
   filter:drop-shadow(0 2px 8px rgba(0,0,0,.75));
 }
 /* button above image */
@@ -8077,7 +8077,9 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   margin:10px auto 8px;
   box-shadow:0 6px 18px rgba(255,45,150,.45);
 }
-/* bonus badge stays on top */
+/* bonus badge pinned top-right above image */
 #games .compact-game-section .game-card:has(.card-media img) .game-bonus-badge{
-  z-index:3;
+  position:absolute !important; top:10px; right:10px; z-index:3;
+  margin:0 !important;
 }
+
