@@ -8038,4 +8038,72 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
 }
 
 
+/* ROYAL CASH — Game cards like reference layout, own purple-pink theme */
+#games .compact-game-section .game-card:has(.card-media img){
+  height:270px !important;
+  min-height:270px !important;
+  max-height:270px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  padding:14px 12px 12px !important;
+  background:linear-gradient(160deg,#0d1226,#070a18) !important;
+  border:1px solid rgba(192,65,255,.5) !important;
+  border-radius:16px !important;
+}
+/* logo area — image contained, not cropped */
+#games .compact-game-section .game-card:has(.card-media img) .card-media{
+  position:relative !important;
+  width:100% !important;
+  height:110px !important;
+  flex:0 0 auto !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  overflow:visible !important;
+  background:transparent !important;
+  padding:0 !important;
+}
+#games .compact-game-section .game-card:has(.card-media img) .card-media img{
+  width:auto !important;
+  max-width:100% !important;
+  height:100% !important;
+  max-height:110px !important;
+  object-fit:contain !important;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.5));
+}
+/* name + button stacked */
+#games .compact-game-section .game-card:has(.card-media img) .card-body{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  width:100% !important;
+  flex:1 1 auto !important;
+}
+#games .compact-game-section .game-card:has(.card-media img) h3{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  background:none !important;
+  font-size:16px !important;
+  font-weight:700 !important;
+  letter-spacing:.3px !important;
+  margin:10px 0 0 !important;
+  padding:0 !important;
+  text-align:center !important;
+  text-transform:none !important;
+}
+/* theme Play Now button (purple-pink) pinned at bottom */
+#games .compact-game-section .game-card:has(.card-media img) .play-btn{
+  margin:auto 0 0 !important;
+  width:100% !important;
+  padding:10px 0 !important;
+  border:none !important;
+  border-radius:12px !important;
+  background:linear-gradient(90deg,#a855f7,#ec4899) !important;
+  color:#fff !important;
+  font-size:15px !important;
+  font-weight:700 !important;
+  box-shadow:0 6px 18px rgba(236,72,153,.45) !important;
+}
 
