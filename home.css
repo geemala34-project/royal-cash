@@ -8035,6 +8035,15 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   margin:8px 0 0 !important;
 }
 
+/* bonus badge: top-right pinned */
+#games .compact-game-section .game-card .game-bonus-badge{
+  position:absolute !important;
+  top:8px !important;
+  right:8px !important;
+  z-index:5 !important;
+  margin:0 !important;
+}
+
 
 
 
