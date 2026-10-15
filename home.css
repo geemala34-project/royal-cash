@@ -7995,7 +7995,7 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   color:#fff !important;
 }
 
-/* ROYAL CASH — Full-bleed logo card (approved v3, card size unchanged) */
+/* ROYAL CASH — Full-bleed logo card (final, card size unchanged) */
 #games .compact-game-section .game-card:has(.card-media img){
   position:relative;
   overflow:hidden;
@@ -8007,13 +8007,17 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
 #games .compact-game-section .game-card:has(.card-media img) .card-media img{
   width:100% !important;
   height:100% !important;
-  object-fit:cover !important;
+  object-fit:contain !important;
   display:block !important;
 }
 /* readability gradient behind button */
 #games .compact-game-section .game-card:has(.card-media img) .card-media::after{
   content:''; position:absolute; inset:0; pointer-events:none;
   background:linear-gradient(to top, rgba(8,0,18,.88) 0%, rgba(8,0,18,.25) 28%, rgba(8,0,18,0) 50%);
+}
+/* let absolute button anchor to card, not card-body */
+#games .compact-game-section .game-card:has(.card-media img) .card-body{
+  position:static !important;
 }
 /* logo has the name — hide separate text */
 #games .compact-game-section .game-card:has(.card-media img) .card-body h3{
@@ -8042,6 +8046,7 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   z-index:3;
   margin:0 !important;
 }
+
 
 
 
