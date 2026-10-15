@@ -7995,45 +7995,7 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
   color:#fff !important;
 }
 
-/* ROYAL CASH — Clean logo cards (original layout, polished) */
-#games .compact-game-section .game-card:has(.card-media img) .card-media{
-  position:relative !important;
-  width:100% !important;
-  height:100px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  overflow:hidden !important;
-  background:transparent !important;
-  padding:0 !important;
-  margin:0 auto !important;
-}
-#games .compact-game-section .game-card:has(.card-media img) .card-media img{
-  width:auto !important;
-  max-width:88% !important;
-  height:auto !important;
-  max-height:100px !important;
-  object-fit:contain !important;
-  display:block !important;
-}
-#games .compact-game-section .game-card:has(.card-media img) .card-body h3{
-  display:block !important;
-  color:#fff !important;
-  -webkit-text-fill-color:#fff !important;
-  background:none !important;
-  font-size:15px !important;
-  font-weight:700 !important;
-  text-align:center !important;
-  text-transform:capitalize !important;
-  margin:8px 0 0 !important;
-  padding:0 !important;
-}
-#games .compact-game-section .game-card:has(.card-media img) .play-btn{
-  position:static !important;
-  display:block !important;
-  width:100% !important;
-  margin:8px 0 0 !important;
-}
+
 
 
 
