@@ -7996,43 +7996,6 @@ body.rc-stage-open #profileDashboard .profile-menu.active{
 }
 
 
-/* ROYAL CASH — Bonus badge (restored) */
-#games .compact-game-section .game-card .game-bonus-badge{
-  position:absolute !important;
-  top:8px !important;
-  right:8px !important;
-  z-index:5 !important;
-  margin:0 !important;
-  width:auto !important;
-  min-width:64px !important;
-  max-width:calc(100% - 14px) !important;
-  height:auto !important;
-  min-height:32px !important;
-  padding:5px 10px !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  display:inline-flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-  font-size:13px !important;
-  font-weight:800 !important;
-  line-height:1.25 !important;
-  color:#fff !important;
-  background:linear-gradient(90deg,#a855f7,#ec4899) !important;
-  border-radius:10px !important;
-  box-shadow:0 4px 12px rgba(0,0,0,.4) !important;
-}
-#games .compact-game-section .game-card .game-bonus-badge .bonus-label{
-  font-size:7px !important;
-  font-weight:700 !important;
-  letter-spacing:1px !important;
-  line-height:1 !important;
-  color:#ffe36b !important;
-}
-#games .compact-game-section .game-card .game-bonus-badge:empty{
-  display:none !important;
-}
 
 
 
